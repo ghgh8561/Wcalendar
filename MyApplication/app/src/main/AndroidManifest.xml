@@ -28,7 +28,9 @@
         <activity android:name=".Main2Activity" />
         <activity android:name=".setting" />
         <activity android:name=".testing" />
-        <activity android:name=".checkbox"></activity>
+        <activity android:name=".checkbox" />
+        <activity android:name=".wifi_listview" />
+        <activity android:name=".insert_db"></activity>
     </application>
 
 </manifest>

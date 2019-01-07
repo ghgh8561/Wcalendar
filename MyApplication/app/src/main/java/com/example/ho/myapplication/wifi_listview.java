@@ -6,19 +6,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class testing extends AppCompatActivity {
+public class wifi_listview extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_testing);
+        setContentView(R.layout.activity_wifi_listview);
 
-        Button wifi_btn = findViewById(R.id.wifi);
-
-        wifi_btn.setOnClickListener(new View.OnClickListener() {
+        Button button = findViewById(R.id.go_insertactivity);
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), wifi_listview.class);
+                Intent intent = new Intent(getApplicationContext(), insert_db.class);
                 startActivity(intent);
             }
         });
