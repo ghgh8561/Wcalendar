@@ -5,31 +5,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Main2Activity">
+    tools:context=".checkbox">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <CheckBox
+            android:id="@+id/fall"
+            android:text="강우량"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <EditText
+            android:hint="%를 적으세요"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/setting"
-            android:text="+"
-            android:layout_weight="1"
+        <CheckBox
+            android:id="@+id/dust"
+            android:text="미세먼지"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-    </LinearLayout>
-    <CalendarView
-        android:id="@+id/calendarview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"></CalendarView>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/setting_2"
-            android:text="+"
-            android:layout_weight="1"
+        <EditText
+            android:hint="농도를 적으세요"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

@@ -5,31 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Main2Activity">
+    tools:context=".setting">
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
-            android:id="@+id/setting"
-            android:text="+"
-            android:layout_weight="1"
+            android:id="@+id/Wheather"
+            android:text="날씨"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
-    <CalendarView
-        android:id="@+id/calendarview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"></CalendarView>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
-            android:id="@+id/setting_2"
-            android:text="+"
-            android:layout_weight="1"
+            android:id="@+id/help"
+            android:text="도움말"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

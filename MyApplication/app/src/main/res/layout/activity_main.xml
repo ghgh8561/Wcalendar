@@ -5,9 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-<<<<<<< HEAD
-    tools:context=".MainActivity"
-    tools:layout_editor_absoluteY="81dp">
+    tools:context=".MainActivity">
 
     <Button
         android:id="@+id/db_create_button"
@@ -51,23 +49,4 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Button" />
-
-=======
-    tools:context=".MainActivity">
-<LinearLayout
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <Button
-        android:id="@+id/create_btn"
-        android:text="create_btn"
-        android:layout_weight="1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    </LinearLayout>
-    <ListView
-        android:id="@+id/wifilist"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"></ListView>
->>>>>>> origin/master
 </LinearLayout>
