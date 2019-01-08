@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     EditText editText;
@@ -101,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
     }
 
     private void openDatabase(String databaseName) {
@@ -128,6 +128,10 @@ public class MainActivity extends AppCompatActivity {
         if (database != null) {
             String sql = "insert into tableName(mac) values(?)";
             Object[] params = {mac};
+            if(mac == null){
+                Toast.makeText(getApplicationContext(),"와이파이가 연결되어있지 않습니다.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             database.execSQL(sql, params);
 
@@ -180,5 +184,4 @@ public class MainActivity extends AppCompatActivity {
             Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
         }
     }
-
 }
