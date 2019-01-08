@@ -27,6 +27,8 @@ public class MyService extends Service {
     SQLiteDatabase database;
     String mac_address;
     String title;
+    String contents;
+
     public MyService() {
     }
 
@@ -42,6 +44,9 @@ public class MyService extends Service {
         cm.registerNetworkCallback(request, new ConnectivityManager.NetworkCallback() {
             public void onAvailable (Network network) {
                 Log.d("MyService", "테스트 onAvailable");
+                WifiManager mng = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                WifiInfo info = mng.getConnectionInfo();
+                mac_address = info.getBSSID();
             }
             public void onLost(Network network) {
                 Log.d("MyService", "테스트 onLost");
@@ -50,7 +55,7 @@ public class MyService extends Service {
 
                 createTable();
 
-                selectData();
+                memoSelect();
             }
         });
         return START_STICKY;
@@ -66,10 +71,10 @@ public class MyService extends Service {
 
     private void createTable() {
         if (database != null) {
-            String sql = "CREATE TABLE IF NOT EXISTS " + "tableName" + "(_id integer PRIMARY KEY autoincrement, mac text)";
+            String sql = "CREATE TABLE IF NOT EXISTS mac(id integer PRIMARY KEY autoincrement, mac text NOT NULL, macName text NOT NULL)";
             database.execSQL(sql);
 
-            String sql2 = "CREATE TABLE IF NOT EXISTS " + "memo" + "(mac text, title text)";
+            String sql2 = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text)";
             database.execSQL(sql2);
 
             Log.d("MyService", "테이블 생성됨.");
@@ -78,35 +83,12 @@ public class MyService extends Service {
         }
     }
 
-    private void selectData() {
-        Log.d("MyService", "selectData() 호출됨.");
-
-        WifiManager mng = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-        WifiInfo info = mng.getConnectionInfo();
-        mac_address = info.getBSSID();
-
-        if (database != null) {
-            String sql = "Select mac FROM " + "tableName" + " WHERE mac = '" + mac_address + "'";
-            Cursor cursor = database.rawQuery(sql, null);
-
-            if (cursor.getCount() != 0) {
-                notificationService();
-            }
-
-            cursor.close();
-        } else {
-            Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
-        }
-    }
-
     private void notificationService() {
-        memoSelect();
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default");
 
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle(mac_address);
-        builder.setContentText(title);
+        builder.setContentTitle(title);
+        builder.setContentText(contents);
 
         Intent intent = new Intent(this, MyService.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
@@ -137,18 +119,21 @@ public class MyService extends Service {
     }
 
     private void memoSelect() {
-        Log.d("MyService", "selectData() 호출됨.");
+        Log.d("MyService", "memoSelect() 호출됨.");
 
         if (database != null) {
-            String sql = "SELECT mac, title FROM " + "memo" + " WHERE mac = '" + mac_address + "'";
+            String sql = "SELECT title, contents FROM memo WHERE mac = '" + mac_address + "'";
+            //String sql = "SELECT mac, title, contents FROM memo";
             Cursor cursor = database.rawQuery(sql, null);
 
             for (int i = 0; i < cursor.getCount(); i++) {
                 cursor.moveToNext();
-                String mac = cursor.getString(0);
-                title = cursor.getString(1);
+                title = cursor.getString(cursor.getColumnIndex("title"));
+                contents = cursor.getString(cursor.getColumnIndex("contents"));
+            }
 
-                Log.d("MyService", "#" + i + "->" + mac + "->" + title);
+            if(cursor.getCount() != 0) {
+                notificationService();
             }
 
             cursor.close();

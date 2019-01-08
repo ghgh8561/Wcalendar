@@ -15,10 +15,12 @@
             android:text="제목"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
         <EditText
-            android:hint="제목을 입력하세요"
+            android:id="@+id/memo_title"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:hint="제목을 입력하세요" />
     </LinearLayout>
 
     <LinearLayout
@@ -39,10 +41,12 @@
             android:text="메모"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
         <EditText
-            android:hint="메모를 입력하세요"
+            android:id="@+id/memo_contents"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:hint="메모를 입력하세요" />
     </LinearLayout>
 
     <LinearLayout
@@ -59,5 +63,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/insert_db_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="저장" />
 
 </LinearLayout>
