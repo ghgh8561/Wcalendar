@@ -1,5 +1,6 @@
 package com.example.ho.myapplication;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,6 +16,7 @@ import android.widget.ListView;
 import java.util.ArrayList;
 
 public class wifi_listview extends AppCompatActivity{
+    public static Activity _wifi_listview;
 
     SQLiteDatabase database;
     ArrayList<String> items = new ArrayList<>();
@@ -26,6 +28,8 @@ public class wifi_listview extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wifi_listview);
+
+        _wifi_listview = wifi_listview.this;
 
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
@@ -43,9 +47,9 @@ public class wifi_listview extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), insert_db.class);
+                intent.putExtra("title",title);
+                intent.putExtra("contents",contents);
                 startActivity(intent);
-
-                finish();
             }
         });
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

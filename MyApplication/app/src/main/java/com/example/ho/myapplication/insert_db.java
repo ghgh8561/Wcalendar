@@ -25,11 +25,17 @@ public class insert_db extends AppCompatActivity {
     WifiInfo info;
     String mac;
     EditText editText;
+    String title;
+    String contents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_insert_db);
+
+        Intent intent = getIntent();
+        title = intent.getStringExtra("title");
+        contents = intent.getStringExtra("contents");
 
         openDatabase("databaseName");
         createTable();
@@ -49,11 +55,16 @@ public class insert_db extends AppCompatActivity {
                         mng = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
                         info = mng.getConnectionInfo();
                         mac = info.getBSSID();
-                        
+
                         String macName = editText.getText().toString().trim();
                         insertData(mac, macName);
 
+                        wifi_listview wl = (wifi_listview)wifi_listview._wifi_listview;
+                        wl.finish();
+
                         Intent intent = new Intent(getApplicationContext(), wifi_listview.class);
+                        intent.putExtra("title",title);
+                        intent.putExtra("contents",contents);
                         startActivity(intent);
 
                         finish();
@@ -64,21 +75,6 @@ public class insert_db extends AppCompatActivity {
                 }
                 else {
                     Toast.makeText(getApplicationContext(), "연결 안됨", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        Button button1 = findViewById(R.id.drop);
-        button1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (database != null) {
-                    String sql = "DROP table " + "mac";
-                    database.execSQL(sql);
-
-                    Log.d("MyService", "테이블 삭제됨.");
-                } else {
-                    Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
                 }
             }
         });

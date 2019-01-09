@@ -59,6 +59,8 @@ public class testing extends AppCompatActivity {
                 String contents = editText_contents.getText().toString().trim();
                 createTable();
                 memoInsert(mac, title, contents);
+
+                finish();
             }
         });
     }

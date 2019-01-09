@@ -7,46 +7,46 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/db_create_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="db_create_button" />
-
-    <Button
-        android:id="@+id/db_insert_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="db_insert_button" />
-
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button" />
-
-    <Button
-        android:id="@+id/db_selectdata_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="db_selectdata_button" />
-
-    <EditText
-        android:id="@+id/EditText"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="EditText"
-        android:textSize="16sp" />
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/db_memo_button"
-        android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/drop_table1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="drop_table1" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="db_memo_button" />
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/drop_table2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="drop_table2" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/go_main2_button"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="달력" />
 </LinearLayout>

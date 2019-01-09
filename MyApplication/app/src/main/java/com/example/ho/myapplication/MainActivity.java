@@ -11,14 +11,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-    EditText editText;
     SQLiteDatabase database;
-    WifiManager mng;
-    WifiInfo info;
-    String mac;
+    TextView textView1;
+    TextView textView2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,40 +27,23 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MyService.class);
         startService(intent);
 
-        String databaseName = "databaseName";
-        openDatabase(databaseName);
+        textView1 = findViewById(R.id.textView1);
+        textView2 = findViewById(R.id.textView2);
 
-        Button button = (Button)findViewById(R.id.db_create_button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String tableName = "tableName";
-                createTable(tableName);
-            }
-        });
+        openDatabase("databaseName");
+        memoCreateTable();
+        memoSelect();
+        macCreateTable();
+        macSelect();
 
-        Button button2 = (Button)findViewById(R.id.db_insert_button);
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mng = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                info = mng.getConnectionInfo();
-                mac = info.getBSSID();
 
-                insertData(mac);
-            }
-        });
-
-        Button button3 = (Button)findViewById(R.id.button3);
-        button3.setOnClickListener(new View.OnClickListener() {
+        Button button1 = findViewById(R.id.drop_table1);
+        button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (database != null) {
-                    String sql = "DROP table " + "tableName";
+                    String sql = "DROP TABLE memo";
                     database.execSQL(sql);
-
-                    String sql2 = "DROP table " + "memo";
-                    database.execSQL(sql2);
 
                     Log.d("MyService", "테이블 삭제됨.");
                 } else {
@@ -70,38 +52,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button button4 = (Button)findViewById(R.id.db_selectdata_button);
-        button4.setOnClickListener(new View.OnClickListener() {
+        Button button2 = findViewById(R.id.drop_table2);
+        button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String tableName = "tableName";
-                selectData(tableName);
+                if (database != null) {
+                    String sql = "DROP TABLE mac";
+                    database.execSQL(sql);
+
+                    Log.d("MyService", "테이블 삭제됨.");
+                } else {
+                    Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
+                }
+
             }
         });
 
-        editText = (EditText)findViewById(R.id.EditText);
-        Button button5 = (Button)findViewById(R.id.db_memo_button);
-        button5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String tableName = "memo";
-                memo(tableName);
-                mng = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                info = mng.getConnectionInfo();
-                mac = info.getBSSID();
-                String title = editText.getText().toString().trim();
-                memoInsert(mac, title);
-            }
-        });
-
-        Button button6 = findViewById(R.id.go_main2_button);
-        button6.setOnClickListener(new View.OnClickListener() {
+        Button button3 = findViewById(R.id.go_main2_button);
+        button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), Main2Activity.class);
                 startActivity(intent);
             }
         });
+
+
     }
 
     private void openDatabase(String databaseName) {
@@ -111,48 +87,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void createTable(String tableName) {
-        if (database != null) {
-            String sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(_id integer PRIMARY KEY autoincrement, mac text)";
-            database.execSQL(sql);
-
-            Log.d("MyService", "테이블 생성됨.");
-        } else {
-            Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
-        }
-    }
-
-    private void insertData(String mac) {
-        Log.d("MyService", "insertData() 호출됨.");
+    private void memoSelect() {
+        Log.d("MyService", "memoSelect() 호출됨.");
 
         if (database != null) {
-            String sql = "insert into tableName(mac) values(?)";
-            Object[] params = {mac};
-            if(mac == null){
-                Toast.makeText(getApplicationContext(),"와이파이가 연결되어있지 않습니다.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            database.execSQL(sql, params);
-
-            Log.d("MyService", "데이터 추가함.");
-        } else {
-            Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
-        }
-    }
-
-    private void selectData(String tableName) {
-        Log.d("MyService", "selectData() 호출됨.");
-
-        if (database != null) {
-            String sql = "select mac from " + tableName;
+            String sql = "SELECT mac, title, contents FROM memo";
+            //String sql = "SELECT mac, title, contents FROM memo";
             Cursor cursor = database.rawQuery(sql, null);
 
             for (int i = 0; i < cursor.getCount(); i++) {
                 cursor.moveToNext();
-                String mac = cursor.getString(0);
-
-                Log.d("MyService", "#" + i + "->" + mac);
+                String mac = cursor.getString(cursor.getColumnIndex("mac"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                String contents = cursor.getString(cursor.getColumnIndex("contents"));
+                textView1.append(mac + " / " + title + " / " + contents + "\n");
             }
 
             cursor.close();
@@ -161,9 +109,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void memo(String tableName) {
+    private void memoCreateTable() {
         if (database != null) {
-            String sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(mac text, title text)";
+            String sql = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text)";
+            //String sql = "DROP table " + "memo";
             database.execSQL(sql);
 
             Log.d("MyService", "테이블 생성됨.");
@@ -172,16 +121,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void memoInsert(String mac, String title) {
+    private void macCreateTable() {
         if (database != null) {
-            String sql = "insert into memo(mac, title) values(?,?)";
-            Object[] params = {mac, title};
+            String sql = "CREATE TABLE IF NOT EXISTS " + "mac" + "(id integer PRIMARY KEY autoincrement, mac text NOT NULL, macName text NOT NULL)";
+            database.execSQL(sql);
 
-            database.execSQL(sql, params);
-
-            Log.d("MyService", "데이터 추가함.");
+            Log.d("MyService", "테이블 생성됨.");
         } else {
             Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
+        }
+    }
+
+    public void macSelect() {
+        if (database != null) {
+            String sql = "Select id, mac, macName FROM mac";
+            Cursor cursor = database.rawQuery(sql, null);
+            if (cursor.getCount() != 0) {
+                for (int i = 0; i < cursor.getCount(); i++) {
+                    cursor.moveToNext();
+                    int id = cursor.getInt(cursor.getColumnIndex("id"));
+                    String mac = cursor.getString(cursor.getColumnIndex("mac"));
+                    String macName = cursor.getString(cursor.getColumnIndex("macName"));
+                    textView2.append(id + " / " + mac + " / " + macName + "\n");
+                }
+            }
         }
     }
 }
