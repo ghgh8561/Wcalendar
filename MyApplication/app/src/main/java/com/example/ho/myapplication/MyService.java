@@ -46,6 +46,9 @@ public class MyService extends Service {
     String contents;
 
     String dust_ServiceKey = "=avRyiVbF2TLqxBhIM2k5I%2B1ftisPzEeqdoqkmchNU0eZh48XElEJPsmtqp8oT2%2BPycIvIoMXeEehXtxwJVL1ow%3D%3D";
+
+    String timeStr;
+    String areaStr;
     public MyService() {
     }
 
@@ -74,6 +77,8 @@ public class MyService extends Service {
                 createTable();
 
                 memoSelect();
+
+                new XMLparser().weatherNotificationService();
             }
         });
         return START_STICKY;
@@ -186,22 +191,58 @@ public class MyService extends Service {
 
         @Override
         protected void onPostExecute(Document doc) {
-            String str = "";
+            timeStr = "";
+            areaStr = "";
             NodeList nodeList = doc.getElementsByTagName("item");
             Log.d("TAG", String.valueOf(nodeList.getLength()));
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Node node = nodeList.item(i);
+            //for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(0);
                 Element element = (Element) node;
 
                 NodeList datatime = element.getElementsByTagName("dataTime");
-                str += "시간 = " + datatime.item(0).getChildNodes().item(0).getNodeValue() + "\n";
+                timeStr += datatime.item(0).getChildNodes().item(0).getNodeValue() + "\n";
 
                 NodeList area = element.getElementsByTagName("gyeongnam");
-                str += "경남 미세먼지 = " + area.item(0).getChildNodes().item(0).getNodeValue() + "\n";
-                Log.d("TAG", str);
-            }
+                areaStr += "경남 미세먼지 = " + area.item(0).getChildNodes().item(0).getNodeValue() + "\n";
+            //}
             super.onPostExecute(doc);
         }
+
+        private void weatherNotificationService() {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "default");
+
+            builder.setSmallIcon(R.mipmap.ic_launcher);
+            builder.setContentTitle(timeStr + " " + areaStr);
+            builder.setContentText("미세먼지 좋음");
+
+            Intent intent = new Intent(getApplicationContext(), XMLparser.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+            builder.setContentIntent(pendingIntent);
+
+//        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),
+//             R.mipmap.ic_launcher);
+//       builder.setLargeIcon(largeIcon);
+
+            builder.setColor(Color.RED);
+
+            Uri ringtoneUri = RingtoneManager.getActualDefaultRingtoneUri(getApplicationContext(),
+                    RingtoneManager.TYPE_NOTIFICATION);
+            builder.setSound(ringtoneUri);
+
+            long[] vibrate = {0, 100, 200, 300};
+            builder.setVibrate(vibrate);
+            builder.setAutoCancel(true);
+
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                manager.createNotificationChannel(new NotificationChannel("default", "기본 채널",
+                        NotificationManager.IMPORTANCE_DEFAULT));
+            }
+            manager.notify(2, builder.build());
+        }
+
     }
     @Override
     public IBinder onBind(Intent intent) {
