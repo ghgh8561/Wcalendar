@@ -17,10 +17,26 @@ import android.net.NetworkRequest;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class MyService extends Service {
     ConnectivityManager cm;
@@ -29,6 +45,7 @@ public class MyService extends Service {
     String title;
     String contents;
 
+    String dust_ServiceKey = "=avRyiVbF2TLqxBhIM2k5I%2B1ftisPzEeqdoqkmchNU0eZh48XElEJPsmtqp8oT2%2BPycIvIoMXeEehXtxwJVL1ow%3D%3D";
     public MyService() {
     }
 
@@ -47,6 +64,7 @@ public class MyService extends Service {
                 WifiManager mng = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
                 WifiInfo info = mng.getConnectionInfo();
                 mac_address = info.getBSSID();
+                new XMLparser().execute();
             }
             public void onLost(Network network) {
                 Log.d("MyService", "테스트 onLost");
@@ -142,6 +160,49 @@ public class MyService extends Service {
         }
     }
 
+    public class XMLparser extends AsyncTask<String, Void, Document> {
+        Document doc;
+        @Override
+        protected Document doInBackground(String... urls) {
+            URL url;
+            try {
+                StringBuilder urlBuilder = new StringBuilder("http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getCtprvnMesureLIst"); /*URL*/
+                urlBuilder.append("?" + URLEncoder.encode("ServiceKey", "UTF-8") + dust_ServiceKey); /*Service Key*/
+                urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/
+                urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지 번호*/
+                urlBuilder.append("&" + URLEncoder.encode("itemCode", "UTF-8") + "=" + URLEncoder.encode("PM10", "UTF-8")); /*측정항목 구분 (SO2, CO, O3, NO2, PM10, PM25)*/
+                urlBuilder.append("&" + URLEncoder.encode("dataGubun", "UTF-8") + "=" + URLEncoder.encode("HOUR", "UTF-8")); /*요청 자료 구분 (시간평균 : HOUR, 일평균 : DAILY)*/
+                urlBuilder.append("&" + URLEncoder.encode("searchCondition", "UTF-8") + "=" + URLEncoder.encode("MONTH", "UTF-8")); /*요청 데이터기간 (일주일 : WEEK, 한달 : MONTH)*/
+                url = new URL(urlBuilder.toString());
+                DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+                doc = documentBuilder.parse(new InputSource(url.openStream()));
+                doc.getDocumentElement().normalize();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return doc;
+        }
+
+        @Override
+        protected void onPostExecute(Document doc) {
+            String str = "";
+            NodeList nodeList = doc.getElementsByTagName("item");
+            Log.d("TAG", String.valueOf(nodeList.getLength()));
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+                Element element = (Element) node;
+
+                NodeList datatime = element.getElementsByTagName("dataTime");
+                str += "시간 = " + datatime.item(0).getChildNodes().item(0).getNodeValue() + "\n";
+
+                NodeList area = element.getElementsByTagName("gyeongnam");
+                str += "경남 미세먼지 = " + area.item(0).getChildNodes().item(0).getNodeValue() + "\n";
+                Log.d("TAG", str);
+            }
+            super.onPostExecute(doc);
+        }
+    }
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
