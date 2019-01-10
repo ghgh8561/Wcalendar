@@ -38,10 +38,12 @@ public class Main2Activity extends AppCompatActivity {
         });
         calendarview.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
-            public void onSelectedDayChange(CalendarView CalendarView, int i, int i1, int i2) {
-                plan_list.setText("Date: " +i + "/" + i1 + 1 + "/" + i2);
-
-                Toast.makeText(getApplicationContext(), i1 + 1 + "월" + i2 + "일", Toast.LENGTH_SHORT).show();
+            public void onSelectedDayChange(CalendarView CalendarView, int year, int month, int day) {
+                Intent intent = new Intent(getApplicationContext(), testing.class);
+                intent.putExtra("year",year);
+                intent.putExtra("month",month+1);
+                intent.putExtra("day",day);
+                startActivity(intent);
             }
         });
     }

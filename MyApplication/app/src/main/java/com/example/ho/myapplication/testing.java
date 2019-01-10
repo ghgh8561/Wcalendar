@@ -31,6 +31,9 @@ public class testing extends AppCompatActivity {
         TextView textView = findViewById(R.id.wifiname);
         textView.setText(intent.getStringExtra("macName"));
         mac = intent.getStringExtra("mac");
+        Log.d("year", String.valueOf(intent.getIntExtra("year", 0)));
+        Log.d("month", String.valueOf(intent.getIntExtra("month", 0)));
+        Log.d("day", String.valueOf(intent.getIntExtra("day", 0)));
 
         editText_title = findViewById(R.id.memo_title);
         editText_contents = findViewById(R.id.memo_contents);
@@ -63,6 +66,8 @@ public class testing extends AppCompatActivity {
                 finish();
             }
         });
+
+
     }
 
     private void openDatabase(String databaseName) {

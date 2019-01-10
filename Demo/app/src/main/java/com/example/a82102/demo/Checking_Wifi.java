@@ -23,6 +23,7 @@ public class Checking_Wifi extends AppCompatActivity {
     String mac;
     String title;
     String contents;
+    String intent_date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,7 @@ public class Checking_Wifi extends AppCompatActivity {
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
         contents = intent.getStringExtra("contents");
+        intent_date = intent.getStringExtra("intent_date");
 
         openDatabase("databaseName");
         createTable();
@@ -49,22 +51,24 @@ public class Checking_Wifi extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), Wifi_add.class);
                 intent.putExtra("title",title);
                 intent.putExtra("contents",contents);
+                intent.putExtra("intent_date",intent_date);
                 startActivity(intent);
             }
         });
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Memo memo = (Memo) Memo._memo;
+                memo.finish();
+
                 String macName = (String) listView.getItemAtPosition(position);
                 Intent intent = new Intent(getApplicationContext(), Memo.class);
                 intent.putExtra("macName",macName);
                 intent.putExtra("mac",mac);
                 intent.putExtra("title",title);
                 intent.putExtra("contents",contents);
+                intent.putExtra("intent_date",intent_date);
                 startActivity(intent);
-
-                Checking_Wifi Cw = (Checking_Wifi) Checking_Wifi._Checking_Wifi;
-                Cw.finish();
 
                 finish();
             }

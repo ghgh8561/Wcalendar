@@ -16,7 +16,9 @@ public class Memo extends AppCompatActivity {
     SQLiteDatabase database;
     EditText editText_title;
     EditText editText_contents;
+    TextView date_textview;
     String mac;
+    int date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +32,11 @@ public class Memo extends AppCompatActivity {
         TextView textView = findViewById(R.id.wifiname);
         textView.setText(intent.getStringExtra("macName"));
         mac = intent.getStringExtra("mac");
+        date_textview = findViewById(R.id.date_textView);
+        date_textview.setText(intent.getStringExtra("intent_date"));
+        date = Integer.parseInt(String.valueOf(intent.getIntExtra("year", 0)) + String.valueOf(intent.getIntExtra("month", 0)) + String.valueOf(intent.getIntExtra("day", 0)));
 
+        System.out.println("하이" + date);
         editText_title = findViewById(R.id.memo_title);
         editText_contents = findViewById(R.id.memo_contents);
         editText_title.setText(intent.getStringExtra("title"));
@@ -42,8 +48,10 @@ public class Memo extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), Checking_Wifi.class);
                 String title = editText_title.getText().toString().trim();
                 String contents = editText_contents.getText().toString().trim();
+                String intent_date = date_textview.getText().toString().trim();
                 intent.putExtra("title",title);
                 intent.putExtra("contents",contents);
+                intent.putExtra("intent_date",intent_date);
                 startActivity(intent);
             }
         });
@@ -57,7 +65,7 @@ public class Memo extends AppCompatActivity {
                 String title = editText_title.getText().toString().trim();
                 String contents = editText_contents.getText().toString().trim();
                 createTable();
-                memoInsert(mac, title, contents);
+                memoInsert(mac, title, contents, date);
 
                 finish();
             }
@@ -73,7 +81,7 @@ public class Memo extends AppCompatActivity {
 
     private void createTable() {
         if (database != null) {
-            String sql = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text)";
+            String sql = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text, date integer)";
             //String sql = "DROP table " + "memo";
             database.execSQL(sql);
 
@@ -83,10 +91,10 @@ public class Memo extends AppCompatActivity {
         }
     }
 
-    private void memoInsert(String mac, String title, String contents) {
+    private void memoInsert(String mac, String title, String contents, int date) {
         if (database != null) {
-            String sql = "INSERT INTO memo(mac, title, contents) VALUES(?,?,?)";
-            Object[] params = {mac, title, contents};
+            String sql = "INSERT INTO memo(mac, title, contents, date) VALUES(?,?,?,?)";
+            Object[] params = {mac, title, contents, date};
 
             database.execSQL(sql, params);
 

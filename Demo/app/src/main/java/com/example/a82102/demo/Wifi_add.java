@@ -23,6 +23,7 @@ public class Wifi_add extends AppCompatActivity {
     EditText editText;
     String title;
     String contents;
+    String intent_date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public class Wifi_add extends AppCompatActivity {
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
         contents = intent.getStringExtra("contents");
+        intent_date = intent.getStringExtra("intent_date");
 
         openDatabase("databaseName");
         createTable();
@@ -61,6 +63,7 @@ public class Wifi_add extends AppCompatActivity {
                         Intent intent = new Intent(getApplicationContext(), Checking_Wifi.class);
                         intent.putExtra("title",title);
                         intent.putExtra("contents",contents);
+                        intent.putExtra("intent_date",intent_date);
                         startActivity(intent);
 
                         finish();

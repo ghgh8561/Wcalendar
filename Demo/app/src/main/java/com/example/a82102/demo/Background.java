@@ -95,7 +95,7 @@ public class Background extends Service {
             String sql = "CREATE TABLE IF NOT EXISTS mac(id integer PRIMARY KEY autoincrement, mac text NOT NULL, macName text NOT NULL)";
             database.execSQL(sql);
 
-            String sql2 = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text)";
+            String sql2 = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text, date integer)";
             database.execSQL(sql2);
 
             Log.d("MyService", "테이블 생성됨.");
