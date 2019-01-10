@@ -29,9 +29,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -45,10 +42,18 @@ public class MyService extends Service {
     String title;
     String contents;
 
+    String Weather_ServiceKey = "=avRyiVbF2TLqxBhIM2k5I%2B1ftisPzEeqdoqkmchNU0eZh48XElEJPsmtqp8oT2%2BPycIvIoMXeEehXtxwJVL1ow%3D%3D";
     String dust_ServiceKey = "=avRyiVbF2TLqxBhIM2k5I%2B1ftisPzEeqdoqkmchNU0eZh48XElEJPsmtqp8oT2%2BPycIvIoMXeEehXtxwJVL1ow%3D%3D";
 
-    String timeStr;
-    String areaStr;
+    //미세먼지
+    String timeStr; // 예보시간
+    String areaStr; // 지역
+
+    //기상
+    String Weather_time; //날씨예보시간
+    String POP; // 강수확률
+
+    String dust;
     public MyService() {
     }
 
@@ -67,7 +72,8 @@ public class MyService extends Service {
                 WifiManager mng = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
                 WifiInfo info = mng.getConnectionInfo();
                 mac_address = info.getBSSID();
-                new XMLparser().execute();
+                new dust_XMLparser().execute();
+                new weather_XMLparser().execute();
             }
             public void onLost(Network network) {
                 Log.d("MyService", "테스트 onLost");
@@ -78,7 +84,9 @@ public class MyService extends Service {
 
                 memoSelect();
 
-                new XMLparser().weatherNotificationService();
+                new dust_XMLparser().weatherNotificationService();
+
+                new weather_XMLparser().fall_NotificationService();
             }
         });
         return START_STICKY;
@@ -164,8 +172,84 @@ public class MyService extends Service {
             Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
         }
     }
+    public class weather_XMLparser extends  AsyncTask<String, Void, Document>{
+        Document doc;
+        @Override
+        protected Document doInBackground(String... urls){
+            URL url;
+            try{
+                StringBuilder urlBuilder = new StringBuilder("http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastSpaceData"); /*URL*/
+                urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + Weather_ServiceKey); /*Service Key*/
+                urlBuilder.append("&" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + URLEncoder.encode("TEST_SERVICE_KEY", "UTF-8")); /*서비스 인증*/
+                urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode("20190110", "UTF-8")); /*‘19년 01월 10일발표*/
+                urlBuilder.append("&" + URLEncoder.encode("base_time","UTF-8") + "=" + URLEncoder.encode("0800", "UTF-8")); /*08시 발표 * 기술문서 참조*/
+                urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode("91", "UTF-8")); /*예보지점의 X 좌표값*/
+                urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode("76", "UTF-8")); /*예보지점의 Y 좌표값*/
+                url = new URL(urlBuilder.toString());
+                DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+                doc = documentBuilder.parse(new InputSource(url.openStream()));
+                doc.getDocumentElement().normalize();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return doc;
+        }
+        @Override
+        protected void onPostExecute(Document doc){
+            POP = "";
+            Weather_time = "";
+            NodeList nodeList = doc.getElementsByTagName("item");
+            //for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(0);
+            Element element = (Element) node;
 
-    public class XMLparser extends AsyncTask<String, Void, Document> {
+            NodeList time = element.getElementsByTagName("baseTime");
+            Weather_time += "예보시간 : " + time.item(0).getChildNodes().item(0).getNodeValue();
+
+            NodeList fall_per = element.getElementsByTagName("fcstValue");
+            POP += "강수확률 : " + fall_per.item(0).getChildNodes().item(0).getNodeValue() + "%";
+
+            Log.d("TAG",POP);
+            super.onPostExecute(doc);
+        }
+        private void fall_NotificationService() {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "default");
+
+            builder.setSmallIcon(R.mipmap.ic_launcher);
+            builder.setContentTitle("강수확률");
+            builder.setContentText(POP);
+
+            Intent intent = new Intent(getApplicationContext(), weather_XMLparser.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+            builder.setContentIntent(pendingIntent);
+
+//        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),
+//             R.mipmap.ic_launcher);
+//       builder.setLargeIcon(largeIcon);
+
+            builder.setColor(Color.RED);
+
+            Uri ringtoneUri = RingtoneManager.getActualDefaultRingtoneUri(getApplicationContext(),
+                    RingtoneManager.TYPE_NOTIFICATION);
+            builder.setSound(ringtoneUri);
+
+            long[] vibrate = {0, 100, 200, 300};
+            builder.setVibrate(vibrate);
+            builder.setAutoCancel(true);
+
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                manager.createNotificationChannel(new NotificationChannel("default", "기본 채널",
+                        NotificationManager.IMPORTANCE_DEFAULT));
+            }
+            manager.notify(3, builder.build());
+        }
+    }
+    //미세먼지 파싱
+    public class dust_XMLparser extends AsyncTask<String, Void, Document> {
         Document doc;
         @Override
         protected Document doInBackground(String... urls) {
@@ -194,7 +278,6 @@ public class MyService extends Service {
             timeStr = "";
             areaStr = "";
             NodeList nodeList = doc.getElementsByTagName("item");
-            Log.d("TAG", String.valueOf(nodeList.getLength()));
             //for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(0);
                 Element element = (Element) node;
@@ -203,7 +286,8 @@ public class MyService extends Service {
                 timeStr += datatime.item(0).getChildNodes().item(0).getNodeValue() + "\n";
 
                 NodeList area = element.getElementsByTagName("gyeongnam");
-                areaStr += "경남 미세먼지 = " + area.item(0).getChildNodes().item(0).getNodeValue() + "\n";
+                dust = area.item(0).getChildNodes().item(0).getNodeValue();
+                areaStr += "경남 미세먼지 = " + dust;
             //}
             super.onPostExecute(doc);
         }
@@ -213,9 +297,16 @@ public class MyService extends Service {
 
             builder.setSmallIcon(R.mipmap.ic_launcher);
             builder.setContentTitle(timeStr + " " + areaStr);
-            builder.setContentText("미세먼지 좋음");
+            if(Integer.parseInt(dust)<=40)
+                builder.setContentText("미세먼지 좋음");
+            if(40<Integer.parseInt(dust) && Integer.parseInt(dust)<=80)
+                builder.setContentText("미세먼지 보통");
+            if(Integer.parseInt(dust)>80 && Integer.parseInt(dust)<=120)
+                builder.setContentText("미세먼지 나쁨");
+            if(Integer.parseInt(dust)>120)
+                builder.setContentText("미세먼지 매우나쁨");
 
-            Intent intent = new Intent(getApplicationContext(), XMLparser.class);
+            Intent intent = new Intent(getApplicationContext(), dust_XMLparser.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
 
