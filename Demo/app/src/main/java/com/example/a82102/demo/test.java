@@ -120,7 +120,7 @@ public class test extends AppCompatActivity {
 
     private void macCreateTable() {
         if (database != null) {
-            String sql = "CREATE TABLE IF NOT EXISTS " + "mac" + "(id integer PRIMARY KEY autoincrement, mac text NOT NULL, macName text NOT NULL)";
+            String sql = "CREATE TABLE IF NOT EXISTS mac(id integer PRIMARY KEY autoincrement, mac text, macName text)";
             database.execSQL(sql);
 
             Log.d("MyService", "테이블 생성됨.");

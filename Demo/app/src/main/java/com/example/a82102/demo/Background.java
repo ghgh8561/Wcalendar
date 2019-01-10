@@ -92,7 +92,7 @@ public class Background extends Service {
 
     private void createTable() {
         if (database != null) {
-            String sql = "CREATE TABLE IF NOT EXISTS mac(id integer PRIMARY KEY autoincrement, mac text NOT NULL, macName text NOT NULL)";
+            String sql = "CREATE TABLE IF NOT EXISTS mac(id integer PRIMARY KEY autoincrement, mac text, macName text)";
             database.execSQL(sql);
 
             String sql2 = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text, date integer)";
