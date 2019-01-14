@@ -52,6 +52,7 @@ public class Memo extends AppCompatActivity {
                 intent.putExtra("title",title);
                 intent.putExtra("contents",contents);
                 intent.putExtra("intent_date",intent_date);
+                intent.putExtra("date",date);
                 startActivity(intent);
             }
         });
@@ -65,7 +66,12 @@ public class Memo extends AppCompatActivity {
                 String title = editText_title.getText().toString().trim();
                 String contents = editText_contents.getText().toString().trim();
                 createTable();
-                memoInsert(mac, title, contents, date);
+                if(date != 0) {
+                    memoInsert(mac, title, contents, date);
+                } else {
+                    Intent intent = getIntent();
+                    memoInsert(mac, title, contents, intent.getIntExtra("date", 0) );
+                }
 
                 finish();
             }

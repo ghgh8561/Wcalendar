@@ -20,19 +20,11 @@ public class MainActivity extends AppCompatActivity {
 
 
         Button set_btn = findViewById(R.id.setting);
-        Button set_2_btn = findViewById(R.id.setting_2);
         Button check = findViewById(R.id.checking);
         set_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), Set.class);
-                startActivity(intent);
-            }
-        });
-        set_2_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), Checking_Wifi.class);
                 startActivity(intent);
             }
         });

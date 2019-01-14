@@ -24,6 +24,7 @@ public class Wifi_add extends AppCompatActivity {
     String title;
     String contents;
     String intent_date;
+    int date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,7 @@ public class Wifi_add extends AppCompatActivity {
         title = intent.getStringExtra("title");
         contents = intent.getStringExtra("contents");
         intent_date = intent.getStringExtra("intent_date");
+        date = intent.getIntExtra("date", 0);
 
         openDatabase("databaseName");
         createTable();
@@ -64,6 +66,7 @@ public class Wifi_add extends AppCompatActivity {
                         intent.putExtra("title",title);
                         intent.putExtra("contents",contents);
                         intent.putExtra("intent_date",intent_date);
+                        intent.putExtra("date",date);
                         startActivity(intent);
 
                         finish();
@@ -88,7 +91,7 @@ public class Wifi_add extends AppCompatActivity {
 
     private void createTable() {
         if (database != null) {
-            String sql = "CREATE TABLE IF NOT EXISTS mac(id integer PRIMARY KEY autoincrement, mac text NOT NULL, macName text NOT NULL)";
+            String sql = "CREATE TABLE IF NOT EXISTS mac(id integer PRIMARY KEY autoincrement, mac text, macName text)";
             database.execSQL(sql);
 
             Log.d("MyService", "테이블 생성됨.");
