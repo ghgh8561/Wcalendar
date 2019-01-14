@@ -31,6 +31,9 @@ import org.xml.sax.InputSource;
 
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,6 +44,8 @@ public class MyService extends Service {
     String mac_address;
     String title;
     String contents;
+    String Timer;
+    String T_time;
 
     String Weather_ServiceKey = "=avRyiVbF2TLqxBhIM2k5I%2B1ftisPzEeqdoqkmchNU0eZh48XElEJPsmtqp8oT2%2BPycIvIoMXeEehXtxwJVL1ow%3D%3D";
     String dust_ServiceKey = "=avRyiVbF2TLqxBhIM2k5I%2B1ftisPzEeqdoqkmchNU0eZh48XElEJPsmtqp8oT2%2BPycIvIoMXeEehXtxwJVL1ow%3D%3D";
@@ -59,7 +64,7 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
+        Time();
         cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkRequest request = new NetworkRequest.Builder()
@@ -181,11 +186,12 @@ public class MyService extends Service {
                 StringBuilder urlBuilder = new StringBuilder("http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastSpaceData"); /*URL*/
                 urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + Weather_ServiceKey); /*Service Key*/
                 urlBuilder.append("&" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + URLEncoder.encode("TEST_SERVICE_KEY", "UTF-8")); /*서비스 인증*/
-                urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode("20190110", "UTF-8")); /*‘19년 01월 10일발표*/
-                urlBuilder.append("&" + URLEncoder.encode("base_time","UTF-8") + "=" + URLEncoder.encode("0800", "UTF-8")); /*08시 발표 * 기술문서 참조*/
+                urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode(Timer, "UTF-8")); /*‘19년 01월 10일발표*/
+                urlBuilder.append("&" + URLEncoder.encode("base_time","UTF-8") + "=" + URLEncoder.encode(T_time, "UTF-8")); /*08시 발표 * 기술문서 참조*/
                 urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode("91", "UTF-8")); /*예보지점의 X 좌표값*/
                 urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode("76", "UTF-8")); /*예보지점의 Y 좌표값*/
                 url = new URL(urlBuilder.toString());
+                Log.d("TAG", String.valueOf(url));
                 DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
                 doc = documentBuilder.parse(new InputSource(url.openStream()));
@@ -200,7 +206,7 @@ public class MyService extends Service {
             POP = "";
             Weather_time = "";
             NodeList nodeList = doc.getElementsByTagName("item");
-            //for (int i = 0; i < nodeList.getLength(); i++) {
+
             Node node = nodeList.item(0);
             Element element = (Element) node;
 
@@ -297,13 +303,13 @@ public class MyService extends Service {
 
             builder.setSmallIcon(R.mipmap.ic_launcher);
             builder.setContentTitle(timeStr + " " + areaStr);
-            if(Integer.parseInt(dust)<=40)
+            if(Integer.parseInt(dust)<=30)
                 builder.setContentText("미세먼지 좋음");
-            if(40<Integer.parseInt(dust) && Integer.parseInt(dust)<=80)
+            if(30<Integer.parseInt(dust) && Integer.parseInt(dust)<=80)
                 builder.setContentText("미세먼지 보통");
-            if(Integer.parseInt(dust)>80 && Integer.parseInt(dust)<=120)
+            if(Integer.parseInt(dust)>80 && Integer.parseInt(dust)<=150)
                 builder.setContentText("미세먼지 나쁨");
-            if(Integer.parseInt(dust)>120)
+            if(Integer.parseInt(dust)>150)
                 builder.setContentText("미세먼지 매우나쁨");
 
             Intent intent = new Intent(getApplicationContext(), dust_XMLparser.class);
@@ -334,6 +340,27 @@ public class MyService extends Service {
             manager.notify(2, builder.build());
         }
 
+    }
+
+    public void Time(){
+        long now = System.currentTimeMillis();
+        Date date;
+        date = new Date(now);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
+        SimpleDateFormat T_simpleDateFormat = new SimpleDateFormat("HH",Locale.KOREA);
+        SimpleDateFormat M_simpleDateFormat = new SimpleDateFormat("mm",Locale.KOREA);
+        Timer = simpleDateFormat.format(now);
+        int min = Integer.parseInt(M_simpleDateFormat.format(now));
+        if(min >= 40) {
+            T_time = T_simpleDateFormat.format(now);
+        }else{
+            int temp = Integer.parseInt(T_simpleDateFormat.format(now));
+            temp = temp-1;
+            T_time = String.valueOf(temp);
+        }
+        T_time = T_time + "00";
+        Log.d("년월일 : ",Timer);
+        Log.d("시간 : ",T_time);
     }
     @Override
     public IBinder onBind(Intent intent) {
