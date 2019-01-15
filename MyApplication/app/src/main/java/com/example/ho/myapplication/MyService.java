@@ -1,14 +1,22 @@
 package com.example.ho.myapplication;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -19,8 +27,12 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import org.w3c.dom.Document;
@@ -46,6 +58,7 @@ public class MyService extends Service {
     String contents;
     String Timer;
     String T_time;
+    int fcstTime;
 
     String Weather_ServiceKey = "=avRyiVbF2TLqxBhIM2k5I%2B1ftisPzEeqdoqkmchNU0eZh48XElEJPsmtqp8oT2%2BPycIvIoMXeEehXtxwJVL1ow%3D%3D";
     String dust_ServiceKey = "=avRyiVbF2TLqxBhIM2k5I%2B1ftisPzEeqdoqkmchNU0eZh48XElEJPsmtqp8oT2%2BPycIvIoMXeEehXtxwJVL1ow%3D%3D";
@@ -59,6 +72,7 @@ public class MyService extends Service {
     String POP; // 강수확률
 
     String dust;
+
     public MyService() {
     }
 
@@ -182,12 +196,14 @@ public class MyService extends Service {
         @Override
         protected Document doInBackground(String... urls){
             URL url;
+            Calculation calculation = new Calculation();
             try{
                 StringBuilder urlBuilder = new StringBuilder("http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastSpaceData"); /*URL*/
                 urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + Weather_ServiceKey); /*Service Key*/
                 urlBuilder.append("&" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + URLEncoder.encode("TEST_SERVICE_KEY", "UTF-8")); /*서비스 인증*/
                 urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode(Timer, "UTF-8")); /*‘19년 01월 10일발표*/
                 urlBuilder.append("&" + URLEncoder.encode("base_time","UTF-8") + "=" + URLEncoder.encode(T_time, "UTF-8")); /*08시 발표 * 기술문서 참조*/
+                urlBuilder.append("&" + URLEncoder.encode("category","UTF-8") + "=" + URLEncoder.encode("POP","UTF-8"));
                 urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode("91", "UTF-8")); /*예보지점의 X 좌표값*/
                 urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode("76", "UTF-8")); /*예보지점의 Y 좌표값*/
                 url = new URL(urlBuilder.toString());
@@ -223,7 +239,7 @@ public class MyService extends Service {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "default");
 
             builder.setSmallIcon(R.mipmap.ic_launcher);
-            builder.setContentTitle("강수확률");
+            builder.setContentTitle("예보시각 : " + fcstTime);
             builder.setContentText(POP);
 
             Intent intent = new Intent(getApplicationContext(), weather_XMLparser.class);
@@ -348,20 +364,38 @@ public class MyService extends Service {
         date = new Date(now);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
         SimpleDateFormat T_simpleDateFormat = new SimpleDateFormat("HH",Locale.KOREA);
-        SimpleDateFormat M_simpleDateFormat = new SimpleDateFormat("mm",Locale.KOREA);
+       // SimpleDateFormat M_simpleDateFormat = new SimpleDateFormat("mm",Locale.KOREA);
         Timer = simpleDateFormat.format(now);
-        int min = Integer.parseInt(M_simpleDateFormat.format(now));
-        if(min >= 40) {
-            T_time = T_simpleDateFormat.format(now);
-        }else{
-            int temp = Integer.parseInt(T_simpleDateFormat.format(now));
-            temp = temp-1;
-            T_time = String.valueOf(temp);
-        }
+       // int min = Integer.parseInt(M_simpleDateFormat.format(now));
+        T_time = T_simpleDateFormat.format(now);
         T_time = T_time + "00";
-        Log.d("년월일 : ",Timer);
-        Log.d("시간 : ",T_time);
+        fcstTime = Integer.parseInt(T_time);
+        if(Integer.parseInt(T_time)>= 0 && Integer.parseInt(T_time)< 300) {
+            int temp = Integer.parseInt(Timer) -1;
+            Timer = String.valueOf(temp);
+            T_time = "2000";
+        }
+        if(Integer.parseInt(T_time)>= 300 && Integer.parseInt(T_time)< 600) {
+            int temp = Integer.parseInt(Timer) - 1;
+            Timer = String.valueOf(temp);
+            T_time = "2300";
+        }
+        if(Integer.parseInt(T_time)>= 600 && Integer.parseInt(T_time)< 900)
+            T_time = "0200";
+        if(Integer.parseInt(T_time)>= 900 && Integer.parseInt(T_time)< 1200)
+            T_time = "0500";
+        if(Integer.parseInt(T_time)>= 1200 && Integer.parseInt(T_time)< 1500) {
+            T_time = "0800";
+        }
+        if(Integer.parseInt(T_time)>= 1500 && Integer.parseInt(T_time)< 1800)
+            T_time = "1100";
+        if(Integer.parseInt(T_time)>= 1800 && Integer.parseInt(T_time)< 2100)
+            T_time = "1500";
+        if(Integer.parseInt(T_time)>= 2100 && Integer.parseInt(T_time)< 0)
+            T_time = "1700";
     }
+
+
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
