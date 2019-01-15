@@ -1,16 +1,26 @@
 package com.example.ho.myapplication;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 public class testing extends AppCompatActivity {
     public static Activity _testing;
@@ -19,6 +29,8 @@ public class testing extends AppCompatActivity {
     EditText editText_contents;
     String mac;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,7 +38,7 @@ public class testing extends AppCompatActivity {
 
         setContentView(R.layout.activity_testing);
 
-        Button wifi_btn = findViewById(R.id.wifi);
+        Button wifi_btn = findViewById(R.id.wifi_picker);
         Intent intent = getIntent();
         TextView textView = findViewById(R.id.wifiname);
         textView.setText(intent.getStringExtra("macName"));
@@ -35,12 +47,13 @@ public class testing extends AppCompatActivity {
         Log.d("month", String.valueOf(intent.getIntExtra("month", 0)));
         Log.d("day", String.valueOf(intent.getIntExtra("day", 0)));
 
+
         editText_title = findViewById(R.id.memo_title);
         editText_contents = findViewById(R.id.memo_contents);
         editText_title.setText(intent.getStringExtra("title"));
         editText_contents.setText(intent.getStringExtra("contents"));
 
-        wifi_btn.setOnClickListener(new View.OnClickListener() {
+         wifi_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), wifi_listview.class);
@@ -66,6 +79,18 @@ public class testing extends AppCompatActivity {
                 finish();
             }
         });
+
+        Spinner yspinner = (Spinner)findViewById(R.id.spinner_year);
+        ArrayAdapter yearAdapter = ArrayAdapter.createFromResource(this, R.array.year, android.R.layout.simple_spinner_dropdown_item);
+        yspinner.setAdapter(yearAdapter);
+
+        Spinner mspinner = (Spinner)findViewById(R.id.spinner_month);
+        ArrayAdapter monthAdapter = ArrayAdapter.createFromResource(this, R.array.month, android.R.layout.simple_spinner_dropdown_item);
+        mspinner.setAdapter(monthAdapter);
+
+        Spinner dspinner = (Spinner)findViewById(R.id.spinner_day);
+        ArrayAdapter dayAdapter = ArrayAdapter.createFromResource(this, R.array.day, android.R.layout.simple_spinner_dropdown_item);
+        dspinner.setAdapter(dayAdapter);
 
 
     }
