@@ -31,6 +31,9 @@ import org.xml.sax.InputSource;
 
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -142,15 +145,23 @@ public class Background extends Service {
     private void memoSelect() {
         Log.d("MyService", "memoSelect() 호출됨.");
 
+        SimpleDateFormat df_date = new SimpleDateFormat("yyyyMd", Locale.KOREA);
+        int date = Integer.parseInt(df_date.format(new Date()));
         if (database != null) {
-            String sql = "SELECT title, contents FROM memo WHERE mac = '" + mac_address + "'";
-            //String sql = "SELECT mac, title, contents FROM memo";
+            String sql = "SELECT mac, title, contents, date "
+                       + "FROM memo "
+                       + "WHERE mac = '" + mac_address + "' "
+                       + "AND date = " + "'" + date + "'";
             Cursor cursor = database.rawQuery(sql, null);
 
             for (int i = 0; i < cursor.getCount(); i++) {
                 cursor.moveToNext();
                 title = cursor.getString(cursor.getColumnIndex("title"));
                 contents = cursor.getString(cursor.getColumnIndex("contents"));
+                String abc = cursor.getString(cursor.getColumnIndex("mac"));
+                int def = cursor.getInt(cursor.getColumnIndex("date"));
+
+                System.out.println("하이얌 " + abc + " " + mac_address + " " + def + " " + date);
             }
 
             if(cursor.getCount() != 0) {
