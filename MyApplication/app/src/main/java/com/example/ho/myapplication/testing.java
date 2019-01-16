@@ -15,10 +15,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListPopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -28,7 +30,6 @@ public class testing extends AppCompatActivity {
     EditText editText_title;
     EditText editText_contents;
     String mac;
-
 
 
     @Override
@@ -81,16 +82,44 @@ public class testing extends AppCompatActivity {
         });
 
         Spinner yspinner = (Spinner)findViewById(R.id.spinner_year);
-        ArrayAdapter yearAdapter = ArrayAdapter.createFromResource(this, R.array.year, android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter yearAdapter = ArrayAdapter.createFromResource(this, R.array.year, android.R.layout.simple_spinner_item);
         yspinner.setAdapter(yearAdapter);
+        try {
+            Field popup = Spinner.class.getDeclaredField("mPopup");
+            popup.setAccessible(true);
+
+            ListPopupWindow window = (ListPopupWindow)popup.get(yspinner);
+            window.setHeight(500); //pixel
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         Spinner mspinner = (Spinner)findViewById(R.id.spinner_month);
-        ArrayAdapter monthAdapter = ArrayAdapter.createFromResource(this, R.array.month, android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter monthAdapter = ArrayAdapter.createFromResource(this, R.array.month, android.R.layout.simple_spinner_item);
         mspinner.setAdapter(monthAdapter);
+        try {
+            Field popup = Spinner.class.getDeclaredField("mPopup");
+            popup.setAccessible(true);
+
+            ListPopupWindow window = (ListPopupWindow)popup.get(mspinner);
+            window.setHeight(400); //pixel
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         Spinner dspinner = (Spinner)findViewById(R.id.spinner_day);
-        ArrayAdapter dayAdapter = ArrayAdapter.createFromResource(this, R.array.day, android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter dayAdapter = ArrayAdapter.createFromResource(this, R.array.day, android.R.layout.simple_spinner_item);
         dspinner.setAdapter(dayAdapter);
+        try {
+            Field popup = Spinner.class.getDeclaredField("mPopup");
+            popup.setAccessible(true);
+
+            ListPopupWindow window = (ListPopupWindow)popup.get(dspinner);
+            window.setHeight(400); //pixel
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
     }

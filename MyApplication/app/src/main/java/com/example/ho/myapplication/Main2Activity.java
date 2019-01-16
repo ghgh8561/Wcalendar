@@ -1,5 +1,6 @@
 package com.example.ho.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class Main2Activity extends AppCompatActivity {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +24,8 @@ public class Main2Activity extends AppCompatActivity {
         final TextView plan_list = findViewById(R.id.plan_list);
 
 
+
+
         set_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -32,20 +36,11 @@ public class Main2Activity extends AppCompatActivity {
         set_2_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Intent intent = new Intent(getApplicationContext(), testing.class);
+                Intent intent = new Intent(getApplicationContext(), testing.class);
                 startActivity(intent);
-                calendarview.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
-                    @Override
-                    public void onSelectedDayChange(CalendarView CalendarView, int year, int month, int day) {
-                        month = month + 1;
-                        intent.putExtra("year",year);
-                        intent.putExtra("month",month);
-                        intent.putExtra("day",day);
-                        startActivity(intent);
-                    }
-                });
             }
         });
+
 
         calendarview.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
@@ -56,5 +51,6 @@ public class Main2Activity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), month + "월" + day + "일", Toast.LENGTH_SHORT).show();
             }
         });
+
     }
 }
