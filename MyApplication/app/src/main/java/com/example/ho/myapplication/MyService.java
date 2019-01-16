@@ -1,19 +1,17 @@
 package com.example.ho.myapplication;
 
-import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -29,10 +27,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import org.w3c.dom.Document;
@@ -45,12 +41,14 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-public class MyService extends Service {
+public class MyService extends Service implements LocationListener {
+
     ConnectivityManager cm;
     SQLiteDatabase database;
     String mac_address;
@@ -71,14 +69,170 @@ public class MyService extends Service {
     String Weather_time; //날씨예보시간
     String POP; // 강수확률
 
-    String dust;
+    String dust; // 미세먼지
+    String cho_dust; // 초미세먼지
 
+    String address;
+
+    // 현재 GPS 사용유무
+    boolean isGPSEnabled = false;
+
+    // 네트워크 사용유무
+    boolean isNetworkEnabled = false;
+
+    // GPS 상태값
+    boolean isGetLocation = false;
+
+    Location location;
+    double lat; // 위도
+    double lon; // 경도
+
+    // 최소 GPS 정보 업데이트 거리 10미터
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
+
+    // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 1분
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1;
+
+    protected LocationManager locationManager;
+    List<Address> address_List = null;
     public MyService() {
     }
 
+    public Location getLocation() {
+        if ( Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission(
+                        this, android.Manifest.permission.ACCESS_FINE_LOCATION )
+                        != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(
+                        this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+            return null;
+        }
+
+        try {
+            locationManager = (LocationManager) this
+                    .getSystemService(LOCATION_SERVICE);
+
+            // GPS 정보 가져오기
+            isGPSEnabled = locationManager
+                    .isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+            // 현재 네트워크 상태 값 알아오기
+            isNetworkEnabled = locationManager
+                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+            if (!isGPSEnabled && !isNetworkEnabled) {
+                // GPS 와 네트워크사용이 가능하지 않을때 소스 구현
+            } else {
+                this.isGetLocation = true;
+                // 네트워크 정보로 부터 위치값 가져오기
+                if (isNetworkEnabled) {
+                    locationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+
+                    if (locationManager != null) {
+                        location = locationManager
+                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        if (location != null) {
+                            // 위도 경도 저장
+                            lat = location.getLatitude();
+                            lon = location.getLongitude();
+                        }
+                    }
+                }
+
+                if (isGPSEnabled) {
+                    if (location == null) {
+                        locationManager.requestLocationUpdates(
+                                LocationManager.GPS_PROVIDER,
+                                MIN_TIME_BW_UPDATES,
+                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                        if (locationManager != null) {
+                            location = locationManager
+                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            if (location != null) {
+                                lat = location.getLatitude();
+                                lon = location.getLongitude();
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return location;
+    }
+
+    /**
+     * GPS 종료
+     * */
+    public void stopUsingGPS(){
+        if(locationManager != null){
+            locationManager.removeUpdates(MyService.this);
+        }
+    }
+
+    /**
+     * 위도값을 가져옵니다.
+     * */
+    public double getLatitude(){
+        if(location != null){
+            lat = location.getLatitude();
+        }
+        return lat;
+    }
+
+    /**
+     * 경도값을 가져옵니다.
+     * */
+    public double getLongitude(){
+        if(location != null){
+            lon = location.getLongitude();
+        }
+        return lon;
+    }
+
+    /**
+     * GPS 나 wife 정보가 켜져있는지 확인합니다.
+     * */
+    public boolean isGetLocation() {
+        return this.isGetLocation;
+    }
+    public void onLocationChanged(Location location) {
+        // TODO Auto-generated method stub
+    }
+
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void onProviderEnabled(String provider) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void onProviderDisabled(String provider) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void MyLocation(){
+        getLocation();
+        if (isGetLocation()) {
+            lat = getLatitude();
+            lon = getLongitude();
+        }
+    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Time();
+        MyLocation();
         cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkRequest request = new NetworkRequest.Builder()
@@ -198,16 +352,15 @@ public class MyService extends Service {
             URL url;
             Calculation calculation = new Calculation();
             try{
+                Calculation.LatXLngY latXLngY = calculation.convertGRID_GPS(calculation.TO_GRID, lat,lon);
                 StringBuilder urlBuilder = new StringBuilder("http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastSpaceData"); /*URL*/
                 urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + Weather_ServiceKey); /*Service Key*/
                 urlBuilder.append("&" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + URLEncoder.encode("TEST_SERVICE_KEY", "UTF-8")); /*서비스 인증*/
                 urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode(Timer, "UTF-8")); /*‘19년 01월 10일발표*/
                 urlBuilder.append("&" + URLEncoder.encode("base_time","UTF-8") + "=" + URLEncoder.encode(T_time, "UTF-8")); /*08시 발표 * 기술문서 참조*/
-                urlBuilder.append("&" + URLEncoder.encode("category","UTF-8") + "=" + URLEncoder.encode("POP","UTF-8"));
-                urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode("91", "UTF-8")); /*예보지점의 X 좌표값*/
-                urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode("76", "UTF-8")); /*예보지점의 Y 좌표값*/
+                urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode(String.valueOf((int)latXLngY.x), "UTF-8")); /*예보지점의 X 좌표값*/
+                urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode(String.valueOf((int)latXLngY.y), "UTF-8")); /*예보지점의 Y 좌표값*/
                 url = new URL(urlBuilder.toString());
-                Log.d("TAG", String.valueOf(url));
                 DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
                 doc = documentBuilder.parse(new InputSource(url.openStream()));
@@ -226,7 +379,7 @@ public class MyService extends Service {
             Node node = nodeList.item(0);
             Element element = (Element) node;
 
-            NodeList time = element.getElementsByTagName("baseTime");
+            NodeList time = element.getElementsByTagName("fcstTime");
             Weather_time += "예보시간 : " + time.item(0).getChildNodes().item(0).getNodeValue();
 
             NodeList fall_per = element.getElementsByTagName("fcstValue");
@@ -277,14 +430,16 @@ public class MyService extends Service {
         protected Document doInBackground(String... urls) {
             URL url;
             try {
-                StringBuilder urlBuilder = new StringBuilder("http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getCtprvnMesureLIst"); /*URL*/
-                urlBuilder.append("?" + URLEncoder.encode("ServiceKey", "UTF-8") + dust_ServiceKey); /*Service Key*/
-                urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/
-                urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지 번호*/
-                urlBuilder.append("&" + URLEncoder.encode("itemCode", "UTF-8") + "=" + URLEncoder.encode("PM10", "UTF-8")); /*측정항목 구분 (SO2, CO, O3, NO2, PM10, PM25)*/
-                urlBuilder.append("&" + URLEncoder.encode("dataGubun", "UTF-8") + "=" + URLEncoder.encode("HOUR", "UTF-8")); /*요청 자료 구분 (시간평균 : HOUR, 일평균 : DAILY)*/
-                urlBuilder.append("&" + URLEncoder.encode("searchCondition", "UTF-8") + "=" + URLEncoder.encode("MONTH", "UTF-8")); /*요청 데이터기간 (일주일 : WEEK, 한달 : MONTH)*/
+                adminname();
+                StringBuilder urlBuilder = new StringBuilder("http://openapi.airkorea.or.kr/openapi/services/rest/ArpltnInforInqireSvc/getCtprvnMesureSidoLIst"); /*URL*/
+                urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + dust_ServiceKey); /*Service Key*/
+                urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/
+                urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지 번호*/
+                urlBuilder.append("&" + URLEncoder.encode("sidoName","UTF-8") + "=" + URLEncoder.encode(address, "UTF-8")); /*시도 이름 (서울, 부산, 대구, 인천, 광주, 대전, 울산, 경기, 강원, 충북, 충남, 전북, 전남, 경북, 경남, 제주, 세종)*/
+                urlBuilder.append("&" + URLEncoder.encode("searchCondition","UTF-8") + "=" + URLEncoder.encode("DAILY", "UTF-8")); /*요청 데이터기간 (시간 : HOUR, 하루 : DAILY)*/
                 url = new URL(urlBuilder.toString());
+                Log.d("지역",address);
+                Log.d("URL", String.valueOf(url));
                 DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
                 doc = documentBuilder.parse(new InputSource(url.openStream()));
@@ -297,8 +452,6 @@ public class MyService extends Service {
 
         @Override
         protected void onPostExecute(Document doc) {
-            timeStr = "";
-            areaStr = "";
             NodeList nodeList = doc.getElementsByTagName("item");
             //for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(0);
@@ -307,9 +460,15 @@ public class MyService extends Service {
                 NodeList datatime = element.getElementsByTagName("dataTime");
                 timeStr += datatime.item(0).getChildNodes().item(0).getNodeValue() + "\n";
 
-                NodeList area = element.getElementsByTagName("gyeongnam");
-                dust = area.item(0).getChildNodes().item(0).getNodeValue();
-                areaStr += "경남 미세먼지 = " + dust;
+                NodeList area = element.getElementsByTagName("cityName");
+                areaStr = area.item(0).getChildNodes().item(0).getNodeValue();
+
+                NodeList dust_1 = element.getElementsByTagName("pm10Value");
+                dust = dust_1.item(0).getChildNodes().item(0).getNodeValue();
+
+                NodeList cho_dust_1 = element.getElementsByTagName("pm25Value");
+                cho_dust = cho_dust_1.item(0).getChildNodes().item(0).getNodeValue();
+
             //}
             super.onPostExecute(doc);
         }
@@ -318,7 +477,7 @@ public class MyService extends Service {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "default");
 
             builder.setSmallIcon(R.mipmap.ic_launcher);
-            builder.setContentTitle(timeStr + " " + areaStr);
+            builder.setContentTitle(areaStr + "미세먼지" + dust + "초미세먼지" + cho_dust);
             if(Integer.parseInt(dust)<=30)
                 builder.setContentText("미세먼지 좋음");
             if(30<Integer.parseInt(dust) && Integer.parseInt(dust)<=80)
@@ -357,7 +516,50 @@ public class MyService extends Service {
         }
 
     }
+    public void adminname(){//지역
+        Geocoder geocoder = new Geocoder(getApplicationContext());
+        try{
+            address_List = geocoder.getFromLocation(lat,lon,10);
 
+            address = address_List.get(0).getAdminArea();
+            if(address.equals("경상남도"))
+                address = "경남";
+            if(address.equals("경상북도"))
+                address = "경북";
+            if(address.equals("충청북도"))
+                address = "충북";
+            if(address.equals("충청남도"))
+                address = "충남";
+            if(address.equals("경상북도"))
+                address = "경북";
+            if(address.equals("전라남도"))
+                address = "전남";
+            if(address.equals("전라북도"))
+                address = "전북";
+            if(address.equals("강원도"))
+                address = "강원";
+            if(address.equals("서울특별시"))
+                address = "서울";
+            if(address.equals("부산광역시"))
+                address = "부산";
+            if(address.equals("대구광역시"))
+                address = "대구";
+            if(address.equals("인천광역시"))
+                address = "인천";
+            if(address.equals("광주광역시"))
+                address = "광주";
+            if(address.equals("대전광역시"))
+                address = "대전";
+            if(address.equals("울산광역시"))
+                address = "울산";
+            if(address.equals("경기도"))
+                address = "경기";
+            if(address.equals("제주특별자치도"))
+                address = "제주";
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     public void Time(){
         long now = System.currentTimeMillis();
         Date date;
