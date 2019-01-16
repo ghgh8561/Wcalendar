@@ -98,7 +98,7 @@ public class Background extends Service {
             String sql = "CREATE TABLE IF NOT EXISTS mac(id integer PRIMARY KEY autoincrement, mac text, macName text)";
             database.execSQL(sql);
 
-            String sql2 = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text, date integer)";
+            String sql2 = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text, date integer, time integer)";
             database.execSQL(sql2);
 
             Log.d("MyService", "테이블 생성됨.");
@@ -148,7 +148,7 @@ public class Background extends Service {
         SimpleDateFormat df_date = new SimpleDateFormat("yyyyMd", Locale.KOREA);
         int date = Integer.parseInt(df_date.format(new Date()));
         if (database != null) {
-            String sql = "SELECT mac, title, contents, date "
+            String sql = "SELECT title, contents "
                        + "FROM memo "
                        + "WHERE mac = '" + mac_address + "' "
                        + "AND date = " + "'" + date + "'";
@@ -158,10 +158,6 @@ public class Background extends Service {
                 cursor.moveToNext();
                 title = cursor.getString(cursor.getColumnIndex("title"));
                 contents = cursor.getString(cursor.getColumnIndex("contents"));
-                String abc = cursor.getString(cursor.getColumnIndex("mac"));
-                int def = cursor.getInt(cursor.getColumnIndex("date"));
-
-                System.out.println("하이얌 " + abc + " " + mac_address + " " + def + " " + date);
             }
 
             if(cursor.getCount() != 0) {

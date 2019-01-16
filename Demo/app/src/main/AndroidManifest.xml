@@ -33,7 +33,7 @@
         <activity android:name=".Memo" />
         <activity android:name=".Checking_Wifi" />
         <activity android:name=".Wifi_add" />
-        <activity android:name=".test"></activity>
+        <activity android:name=".test" />
     </application>
 
 </manifest>

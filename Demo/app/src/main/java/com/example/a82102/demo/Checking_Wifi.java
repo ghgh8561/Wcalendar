@@ -26,6 +26,8 @@ public class Checking_Wifi extends AppCompatActivity {
     String intent_date;
     int date;
 
+    boolean update_check;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,10 +40,11 @@ public class Checking_Wifi extends AppCompatActivity {
         contents = intent.getStringExtra("contents");
         intent_date = intent.getStringExtra("intent_date");
         date = intent.getIntExtra("date", 0);
+        update_check = intent.getBooleanExtra("update_check", false);
 
         openDatabase("databaseName");
         createTable();
-        lookupdata("mac");
+        macSelect();
         final ListView listView = findViewById(R.id.listview);
         ArrayAdapter arrayAdapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, items);
         listView.setAdapter(arrayAdapter);
@@ -55,6 +58,7 @@ public class Checking_Wifi extends AppCompatActivity {
                 intent.putExtra("contents",contents);
                 intent.putExtra("intent_date",intent_date);
                 intent.putExtra("date",date);
+                intent.putExtra("update_check",update_check);
 
                 startActivity(intent);
             }
@@ -73,6 +77,7 @@ public class Checking_Wifi extends AppCompatActivity {
                 intent.putExtra("contents",contents);
                 intent.putExtra("intent_date",intent_date);
                 intent.putExtra("date",date);
+                intent.putExtra("update_check",update_check);
                 startActivity(intent);
 
                 finish();
@@ -95,7 +100,7 @@ public class Checking_Wifi extends AppCompatActivity {
         }
     }
 
-    public void lookupdata(String tablename) {
+    public void macSelect() {
         if (database != null) {
             items.clear();
             String sql = "Select mac, macName FROM mac";

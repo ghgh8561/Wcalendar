@@ -65,14 +65,6 @@ public class test extends AppCompatActivity {
 
             }
         });
-//        Button button3 = findViewById(R.id.go_main2_button);
-//        button3.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(getApplicationContext(), Main2Activity.class);
-//                startActivity(intent);
-//            }
-//        });
     }
 
 
@@ -87,7 +79,7 @@ public class test extends AppCompatActivity {
         Log.d("MyService", "memoSelect() 호출됨.");
 
         if (database != null) {
-            String sql = "SELECT mac, title, contents, date FROM memo";
+            String sql = "SELECT mac, title, contents, date, time FROM memo";
             //String sql = "SELECT mac, title, contents FROM memo";
             Cursor cursor = database.rawQuery(sql, null);
 
@@ -97,7 +89,8 @@ public class test extends AppCompatActivity {
                 String title = cursor.getString(cursor.getColumnIndex("title"));
                 String contents = cursor.getString(cursor.getColumnIndex("contents"));
                 String date = cursor.getString(cursor.getColumnIndex("date"));
-                textView1.append(mac + " / " + title + " / " + contents + " / " + date + "\n");
+                String time = cursor.getString(cursor.getColumnIndex("time"));
+                textView1.append(mac + " / " + title + " / " + contents + " / " + date + " / " + time + "\n");
             }
 
             cursor.close();
@@ -108,7 +101,7 @@ public class test extends AppCompatActivity {
 
     private void memoCreateTable() {
         if (database != null) {
-            String sql = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text, date integer)";
+            String sql = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text, date integer, time integer)";
             //String sql = "DROP table " + "memo";
             database.execSQL(sql);
 
