@@ -44,9 +44,4 @@
             android:text="drop_table2" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/go_main2_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="달력" />
 </LinearLayout>

@@ -2,6 +2,7 @@ package com.example.a82102.demo;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +11,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class Memo extends AppCompatActivity {
     public static Activity _memo;
@@ -18,7 +24,10 @@ public class Memo extends AppCompatActivity {
     EditText editText_contents;
     TextView date_textview;
     String mac;
+    String time;
     int date;
+
+    boolean update_check;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,14 +38,16 @@ public class Memo extends AppCompatActivity {
 
         Button wifi_btn = findViewById(R.id.wifi);
         Intent intent = getIntent();
-        TextView textView = findViewById(R.id.wifiname);
+        final TextView textView = findViewById(R.id.wifi_name);
         textView.setText(intent.getStringExtra("macName"));
         mac = intent.getStringExtra("mac");
+        update_check = intent.getBooleanExtra("update_check", false);
+        time = intent.getStringExtra("time");
+
         date_textview = findViewById(R.id.date_textView);
         date_textview.setText(intent.getStringExtra("intent_date"));
         date = Integer.parseInt(String.valueOf(intent.getIntExtra("year", 0)) + String.valueOf(intent.getIntExtra("month", 0)) + String.valueOf(intent.getIntExtra("day", 0)));
 
-        System.out.println("하이" + date);
         editText_title = findViewById(R.id.memo_title);
         editText_contents = findViewById(R.id.memo_contents);
         editText_title.setText(intent.getStringExtra("title"));
@@ -45,6 +56,7 @@ public class Memo extends AppCompatActivity {
         wifi_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 Intent intent = new Intent(getApplicationContext(), Checking_Wifi.class);
                 String title = editText_title.getText().toString().trim();
                 String contents = editText_contents.getText().toString().trim();
@@ -53,6 +65,7 @@ public class Memo extends AppCompatActivity {
                 intent.putExtra("contents",contents);
                 intent.putExtra("intent_date",intent_date);
                 intent.putExtra("date",date);
+                intent.putExtra("update_check",update_check);
                 startActivity(intent);
             }
         });
@@ -63,17 +76,41 @@ public class Memo extends AppCompatActivity {
         insert_db_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String title = editText_title.getText().toString().trim();
-                String contents = editText_contents.getText().toString().trim();
-                createTable();
-                if(date != 0) {
-                    memoInsert(mac, title, contents, date);
-                } else {
-                    Intent intent = getIntent();
-                    memoInsert(mac, title, contents, intent.getIntExtra("date", 0) );
-                }
+                Intent intent = getIntent();
+                Intent intent_main = new Intent(getApplicationContext(), MainActivity.class);
+                if(update_check == false) { //memo 저장
+                    String title = editText_title.getText().toString().trim();
+                    String contents = editText_contents.getText().toString().trim();
+                    SimpleDateFormat df_time = new SimpleDateFormat("HHmmss", Locale.KOREA);
+                    int time = Integer.parseInt(df_time.format(new Date()));
+                    createTable();
+                    if(date != 0) {
+                        memoInsert(mac, title, contents, date, time);
+                    } else {
+                        memoInsert(mac, title, contents, intent.getIntExtra("date", 0), time);
+                    }
 
-                finish();
+                    MainActivity mainActivity = (MainActivity) MainActivity._MainActivity;
+                    mainActivity.finish();
+
+                    finish();
+
+                    startActivity(intent_main);
+                }
+                else { //memo 수정
+                    String title = editText_title.getText().toString().trim();
+                    String contents = editText_contents.getText().toString().trim();
+                    String macName = textView.getText().toString().trim();
+                    macSelect(macName);
+                    memoUpdate(mac, title, contents, time);
+
+                    MainActivity mainActivity = (MainActivity) MainActivity._MainActivity;
+                    mainActivity.finish();
+
+                    finish();
+
+                    startActivity(intent_main);
+                }
             }
         });
     }
@@ -87,7 +124,7 @@ public class Memo extends AppCompatActivity {
 
     private void createTable() {
         if (database != null) {
-            String sql = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text, date integer)";
+            String sql = "CREATE TABLE IF NOT EXISTS memo(mac text, title text, contents text, date integer, time integer)";
             //String sql = "DROP table " + "memo";
             database.execSQL(sql);
 
@@ -97,16 +134,41 @@ public class Memo extends AppCompatActivity {
         }
     }
 
-    private void memoInsert(String mac, String title, String contents, int date) {
+    private void memoInsert(String mac, String title, String contents, int date, int time) {
         if (database != null) {
-            String sql = "INSERT INTO memo(mac, title, contents, date) VALUES(?,?,?,?)";
-            Object[] params = {mac, title, contents, date};
+            String sql = "INSERT INTO memo(mac, title, contents, date, time) VALUES(?,?,?,?,?)";
+            Object[] params = {mac, title, contents, date, time};
 
             database.execSQL(sql, params);
 
             Log.d("MyService", "데이터 추가함.");
         } else {
             Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
+        }
+    }
+
+    private void memoUpdate(String mac, String title, String contents, String time) {
+        if (database != null) {
+            String sql = "UPDATE memo SET mac = '" + mac + "', title = '" + title + "', contents = '" + contents + "' WHERE time = " + time;
+
+            database.execSQL(sql);
+
+            Log.d("MyService", "데이터 수정함.");
+        } else {
+            Log.d("MyService", "먼저 데이터베이스를 오픈하세요.");
+        }
+    }
+
+    public void macSelect(String macName) {
+        if (database != null) {
+            String sql = "Select mac, macName FROM mac WHERE macName = '" + macName + "'";
+            Cursor cursor = database.rawQuery(sql, null);
+            if (cursor.getCount() != 0) {
+                for (int i = 0; i < cursor.getCount(); i++) {
+                    cursor.moveToNext();
+                    mac = cursor.getString(cursor.getColumnIndex("mac"));
+                }
+            }
         }
     }
 }
