@@ -27,7 +27,6 @@ public class Set extends AppCompatActivity {
         help_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("TAG","도움말버튼눌럿쩌염");
             }
         });
     }
