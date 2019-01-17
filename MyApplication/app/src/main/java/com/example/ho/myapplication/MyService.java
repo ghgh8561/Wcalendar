@@ -37,6 +37,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -72,7 +73,8 @@ public class MyService extends Service implements LocationListener {
     String dust; // 미세먼지
     String cho_dust; // 초미세먼지
 
-    String address;
+    String address; // 지역(도)
+    String[] sigoongo;
 
     // 현재 GPS 사용유무
     boolean isGPSEnabled = false;
@@ -233,6 +235,7 @@ public class MyService extends Service implements LocationListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Time();
         MyLocation();
+        gooname();
         cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkRequest request = new NetworkRequest.Builder()
@@ -453,23 +456,24 @@ public class MyService extends Service implements LocationListener {
         @Override
         protected void onPostExecute(Document doc) {
             NodeList nodeList = doc.getElementsByTagName("item");
-            //for (int i = 0; i < nodeList.getLength(); i++) {
-                Node node = nodeList.item(0);
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
                 Element element = (Element) node;
+                if(sigoongo[2].equals(element.getElementsByTagName("cityName").item(0).getChildNodes().item(0).getNodeValue())){
+                    NodeList datatime = element.getElementsByTagName("dataTime");
+                    timeStr = datatime.item(0).getChildNodes().item(0).getNodeValue() + "\n";
 
-                NodeList datatime = element.getElementsByTagName("dataTime");
-                timeStr += datatime.item(0).getChildNodes().item(0).getNodeValue() + "\n";
+                    NodeList area = element.getElementsByTagName("cityName");
+                    areaStr = area.item(0).getChildNodes().item(0).getNodeValue();
 
-                NodeList area = element.getElementsByTagName("cityName");
-                areaStr = area.item(0).getChildNodes().item(0).getNodeValue();
+                    NodeList dust_1 = element.getElementsByTagName("pm10Value");
+                    dust = dust_1.item(0).getChildNodes().item(0).getNodeValue();
 
-                NodeList dust_1 = element.getElementsByTagName("pm10Value");
-                dust = dust_1.item(0).getChildNodes().item(0).getNodeValue();
+                    NodeList cho_dust_1 = element.getElementsByTagName("pm25Value");
+                    cho_dust = cho_dust_1.item(0).getChildNodes().item(0).getNodeValue();
+                }
+            }
 
-                NodeList cho_dust_1 = element.getElementsByTagName("pm25Value");
-                cho_dust = cho_dust_1.item(0).getChildNodes().item(0).getNodeValue();
-
-            //}
             super.onPostExecute(doc);
         }
 
@@ -477,7 +481,7 @@ public class MyService extends Service implements LocationListener {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "default");
 
             builder.setSmallIcon(R.mipmap.ic_launcher);
-            builder.setContentTitle(areaStr + "미세먼지" + dust + "초미세먼지" + cho_dust);
+            builder.setContentTitle(areaStr + "미세먼지" + dust + " 초미세먼지" + cho_dust);
             if(Integer.parseInt(dust)<=30)
                 builder.setContentText("미세먼지 좋음");
             if(30<Integer.parseInt(dust) && Integer.parseInt(dust)<=80)
@@ -520,7 +524,6 @@ public class MyService extends Service implements LocationListener {
         Geocoder geocoder = new Geocoder(getApplicationContext());
         try{
             address_List = geocoder.getFromLocation(lat,lon,10);
-
             address = address_List.get(0).getAdminArea();
             if(address.equals("경상남도"))
                 address = "경남";
@@ -560,6 +563,18 @@ public class MyService extends Service implements LocationListener {
             e.printStackTrace();
         }
     }
+
+    public void gooname(){
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            address_List = geocoder.getFromLocation(lat, lon,10);
+            String address_name = address_List.get(0).getAddressLine(0).replace(",",""); // 전체주소
+            sigoongo = address_name.split(" "); // 지역으로나누기위해 공백기준으로 문자열 자름
+            Log.d("goo_name : ", sigoongo[2]); // 지역
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        }
     public void Time(){
         long now = System.currentTimeMillis();
         Date date;
