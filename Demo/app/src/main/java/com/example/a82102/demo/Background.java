@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -39,6 +40,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class Background extends Service {
+    Boolean fall_check;
+    Boolean dust_check;
+
     public Background() {
     }
 
@@ -54,7 +58,9 @@ public class Background extends Service {
     String areaStr;
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(final Intent intent, int flags, int startId) {
+
+        dust_check = intent.getBooleanExtra("dust_check", false);
 
         cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -69,6 +75,7 @@ public class Background extends Service {
                 WifiInfo info = mng.getConnectionInfo();
                 mac_address = info.getBSSID();
                 new XMLparser().execute();
+
             }
             public void onLost(Network network) {
                 Log.d("MyService", "테스트 onLost");
@@ -79,7 +86,10 @@ public class Background extends Service {
 
                 memoSelect();
 
-                new XMLparser().weatherNotificationService();
+                if (getDust_check() == true) {
+                    new XMLparser().weatherNotificationService();
+                }
+
             }
         });
         return START_STICKY;
@@ -199,7 +209,6 @@ public class Background extends Service {
             timeStr = "";
             areaStr = "";
             NodeList nodeList = doc.getElementsByTagName("item");
-            Log.d("TAG", String.valueOf(nodeList.getLength()));
             //for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(0);
             Element element = (Element) node;
@@ -249,10 +258,36 @@ public class Background extends Service {
         }
 
     }
+
+    IBinder mBinder = new MyBinder();
+
+    class MyBinder extends Binder {
+        Background getService() { // 서비스 객체를 리턴
+            return Background.this;
+        }
+    }
+
+    public Boolean getFall_check() {
+        return fall_check;
+    }
+
+    public void setFall_check(Boolean fall_check) {
+        this.fall_check = fall_check;
+    }
+
+    public Boolean getDust_check() {
+        return dust_check;
+    }
+
+    public void setDust_check(Boolean fall_check) {
+        this.dust_check = dust_check;
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        //throw new UnsupportedOperationException("Not yet implemented");
+        return mBinder;
     }
 }
 
