@@ -21,7 +21,10 @@
     <CalendarView
         android:id="@+id/calendarview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></CalendarView>
+        android:layout_height="wrap_content"
+        android:minDate="1/1/2018"
+        android:maxDate="12/31/2038">
+    </CalendarView>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

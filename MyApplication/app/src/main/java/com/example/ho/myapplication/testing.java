@@ -7,12 +7,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListPopupWindow;
@@ -25,6 +28,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class testing extends AppCompatActivity {
+    private TextView showdate;
+    private Button datepicker;
+    private DatePickerDialog.OnDateSetListener dateSetListener;
+
     public static Activity _testing;
     SQLiteDatabase database;
     EditText editText_title;
@@ -39,6 +46,8 @@ public class testing extends AppCompatActivity {
 
         setContentView(R.layout.activity_testing);
 
+        showdate = (TextView) findViewById(R.id.show_date);
+        datepicker = (Button) findViewById(R.id.date_picker);
         Button wifi_btn = findViewById(R.id.wifi_picker);
         Intent intent = getIntent();
         TextView textView = findViewById(R.id.wifiname);
@@ -53,6 +62,38 @@ public class testing extends AppCompatActivity {
         editText_contents = findViewById(R.id.memo_contents);
         editText_title.setText(intent.getStringExtra("title"));
         editText_contents.setText(intent.getStringExtra("contents"));
+
+        String year = String.valueOf(intent.getIntExtra("year", 0));
+        String month = String.valueOf(intent.getIntExtra("month", 0));
+        String day = String.valueOf(intent.getIntExtra("day", 0));
+        String choose_date = year + "/" + month + "/" + day;
+        showdate.setText(choose_date);
+
+        datepicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar c = Calendar.getInstance();
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+
+                DatePickerDialog dialog = new DatePickerDialog(
+                        testing.this, android.R.style.,
+                        dateSetListener, year,month,day);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.show();
+            }
+        });
+
+        dateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                month = month + 1;
+                String date = year + "/" + month + "/" + dayOfMonth;
+                showdate.setText(date);
+            }
+        };
 
          wifi_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,47 +121,6 @@ public class testing extends AppCompatActivity {
                 finish();
             }
         });
-
-        Spinner yspinner = (Spinner)findViewById(R.id.spinner_year);
-        ArrayAdapter yearAdapter = ArrayAdapter.createFromResource(this, R.array.year, android.R.layout.simple_spinner_item);
-        yspinner.setAdapter(yearAdapter);
-        try {
-            Field popup = Spinner.class.getDeclaredField("mPopup");
-            popup.setAccessible(true);
-
-            ListPopupWindow window = (ListPopupWindow)popup.get(yspinner);
-            window.setHeight(500); //pixel
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-        Spinner mspinner = (Spinner)findViewById(R.id.spinner_month);
-        ArrayAdapter monthAdapter = ArrayAdapter.createFromResource(this, R.array.month, android.R.layout.simple_spinner_item);
-        mspinner.setAdapter(monthAdapter);
-        try {
-            Field popup = Spinner.class.getDeclaredField("mPopup");
-            popup.setAccessible(true);
-
-            ListPopupWindow window = (ListPopupWindow)popup.get(mspinner);
-            window.setHeight(400); //pixel
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Spinner dspinner = (Spinner)findViewById(R.id.spinner_day);
-        ArrayAdapter dayAdapter = ArrayAdapter.createFromResource(this, R.array.day, android.R.layout.simple_spinner_item);
-        dspinner.setAdapter(dayAdapter);
-        try {
-            Field popup = Spinner.class.getDeclaredField("mPopup");
-            popup.setAccessible(true);
-
-            ListPopupWindow window = (ListPopupWindow)popup.get(dspinner);
-            window.setHeight(400); //pixel
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
 
     }
 
