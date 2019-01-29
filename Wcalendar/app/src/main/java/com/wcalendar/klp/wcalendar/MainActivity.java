@@ -1,5 +1,6 @@
 package com.wcalendar.klp.wcalendar;
 
+import android.Manifest;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -15,6 +16,8 @@ import android.widget.PopupMenu;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.CalendarMode;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
@@ -23,6 +26,7 @@ import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 import at.markushi.ui.CircleButton;
 
@@ -39,6 +43,21 @@ public class MainActivity extends AppCompatActivity {
 
         menu();
 
+        PermissionListener permissionListener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                startService(new Intent(getApplicationContext(), MyService.class));
+                Toast.makeText(getApplicationContext(),"됏다!",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+                Toast.makeText(getApplicationContext(),"안됏네 ㅠㅠ!",Toast.LENGTH_LONG).show();
+            }
+        };
+        TedPermission.with(this).setPermissionListener(permissionListener).setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                .setPermissions(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+                .check();
     }
 
     private void circleButton(final int year, final int month, final int day) {
