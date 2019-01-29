@@ -59,7 +59,7 @@
             android:layout_height="match_parent"
             app:srcCompat="@drawable/ic_action_date" />
 
-        <EditText
+        <TextView
             android:id="@+id/memo_date"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

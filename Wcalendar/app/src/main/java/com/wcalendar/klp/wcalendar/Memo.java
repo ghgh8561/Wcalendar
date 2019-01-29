@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 public class Memo extends AppCompatActivity {
 
@@ -14,7 +15,20 @@ public class Memo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo);
 
+        layout();
+
         button();
+    }
+
+    private void layout() {
+        TextView memo_date = findViewById(R.id.memo_date);
+
+        Intent Memo_intent = getIntent();
+        int year = Memo_intent.getIntExtra("intent_year", 0);
+        int month = Memo_intent.getIntExtra("intent_month", 0);
+        int day = Memo_intent.getIntExtra("intent_day", 0);
+
+        memo_date.append(String.valueOf(year) + String.valueOf(month) + String.valueOf(day));
     }
 
     private void button() {

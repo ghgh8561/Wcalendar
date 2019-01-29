@@ -2,32 +2,19 @@ package com.wcalendar.klp.wcalendar;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.BounceInterpolator;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-import com.baoyz.swipemenulistview.SwipeMenu;
-import com.baoyz.swipemenulistview.SwipeMenuCreator;
-import com.baoyz.swipemenulistview.SwipeMenuItem;
-import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.CalendarMode;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
@@ -52,16 +39,17 @@ public class MainActivity extends AppCompatActivity {
 
         menu();
 
-        circleButton();
-
     }
 
-    private void circleButton() {
+    private void circleButton(final int year, final int month, final int day) {
         CircleButton circleButton = findViewById(R.id.main_circle_Button);
         circleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent go_memo_intent = new Intent(getApplicationContext(), Memo.class);
+                go_memo_intent.putExtra("intent_year", year);
+                go_memo_intent.putExtra("intent_month", month);
+                go_memo_intent.putExtra("intent_day", day);
                 startActivity(go_memo_intent);
             }
         });
@@ -154,16 +142,24 @@ public class MainActivity extends AppCompatActivity {
         materialCalendarView.addDecorators(
                 oneDayDecorator);
 
+
+
         materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-                System.out.println("하이야" + date.getYear());
+                int year = date.getYear();
+                int month = date.getMonth() + 1;
+                int day = date.getDay();
 
+                circleButton(year, month, day);
             }
         });
 
-        //달력 빨간점 표시
         Calendar calendar = Calendar.getInstance();
+        materialCalendarView.setDateSelected(calendar.getTime(), true);
+        circleButton(CalendarDay.today().getYear(), CalendarDay.today().getMonth() + 1, CalendarDay.today().getDay());
+
+        //달력 빨간점 표시
         calendar.add(Calendar.MONTH, -2);
         ArrayList<CalendarDay> dates = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
