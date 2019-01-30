@@ -37,7 +37,7 @@
         <ImageView
             android:id="@+id/memo_title_imageView"
             android:layout_width="50dp"
-            android:layout_height="match_parent"
+            android:layout_height="46dp"
             app:srcCompat="@drawable/ic_action_title" />
 
         <EditText
@@ -56,14 +56,14 @@
         <ImageView
             android:id="@+id/memo_date_imageView"
             android:layout_width="50dp"
-            android:layout_height="match_parent"
+            android:layout_height="46dp"
             app:srcCompat="@drawable/ic_action_date" />
 
         <TextView
             android:id="@+id/memo_date"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="날짜" />
+            android:textSize="18sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -75,7 +75,7 @@
         <ImageView
             android:id="@+id/memo_memo_imageView"
             android:layout_width="50dp"
-            android:layout_height="match_parent"
+            android:layout_height="46dp"
             app:srcCompat="@drawable/ic_action_description" />
 
         <EditText
@@ -94,15 +94,13 @@
         <ImageButton
             android:id="@+id/memo_wifi_imageButton"
             android:layout_width="50dp"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             app:srcCompat="@drawable/ic_action_wifi" />
 
-        <EditText
+        <TextView
             android:id="@+id/memo_wifi_name"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="공유기" />
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 

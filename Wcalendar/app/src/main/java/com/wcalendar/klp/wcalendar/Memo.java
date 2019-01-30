@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -22,6 +23,9 @@ public class Memo extends AppCompatActivity {
 
     private void layout() {
         TextView memo_date = findViewById(R.id.memo_date);
+        EditText memo_title = findViewById(R.id.memo_title);
+        EditText memo_contents = findViewById(R.id.memo_contents);
+        TextView memo_wifi_name = findViewById(R.id.memo_wifi_name);
 
         Intent Memo_intent = getIntent();
         int year = Memo_intent.getIntExtra("intent_year", 0);
