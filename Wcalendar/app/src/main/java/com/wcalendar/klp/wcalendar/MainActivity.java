@@ -43,18 +43,28 @@ public class MainActivity extends AppCompatActivity {
 
         menu();
 
+        permissioncheck();
+    }
+
+    private void permissioncheck(){
         PermissionListener permissionListener = new PermissionListener() {
             @Override
-            public void onPermissionGranted() {
+            public void onPermissionGranted() { // 퍼미션 권한 획득시 실행되는 메소드
                 startService(new Intent(getApplicationContext(), MyService.class));
+//                MyService myService = new MyService();
+//                if(myService.isGetLocation == false){
+//                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                    startActivityForResult(intent,1);
+//                }
                 Toast.makeText(getApplicationContext(),"됏다!",Toast.LENGTH_LONG).show();
             }
 
             @Override
-            public void onPermissionDenied(List<String> deniedPermissions) {
+            public void onPermissionDenied(List<String> deniedPermissions) { // 퍼미션 권한 거부시 실행되는 메소드
                 Toast.makeText(getApplicationContext(),"안됏네 ㅠㅠ!",Toast.LENGTH_LONG).show();
             }
         };
+        //거부누를시 설정창으로 이동하게 되는부분
         TedPermission.with(this).setPermissionListener(permissionListener).setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
                 .setPermissions(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
                 .check();
