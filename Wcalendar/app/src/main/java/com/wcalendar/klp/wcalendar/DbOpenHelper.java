@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DbOpenHelper {
     private static final String DATABASE_NAME = "InnerDatabase(SQLite).db";
@@ -71,7 +70,6 @@ public class DbOpenHelper {
         ContentValues values = new ContentValues();
         values.put(Database.CreateDB.MAC, mac);
         values.put(Database.CreateDB.NAME, name);
-        Log.d("gg", "완료");
         return mDBw.insert(Database.CreateDB._TABLENAME1, null, values);
     }
 
@@ -82,5 +80,12 @@ public class DbOpenHelper {
 
     public boolean wifiDeleteColumn(long id) {
         return mDBw.delete(Database.CreateDB._TABLENAME1, "_id=" + id, null) > 0;
+    }
+
+    public boolean wifiUpdateColumn(long id, String mac, String name) {
+        ContentValues values = new ContentValues();
+        values.put(Database.CreateDB.MAC, mac);
+        values.put(Database.CreateDB.NAME, name);
+        return mDBr.update(Database.CreateDB._TABLENAME1, values, "_id=" + id, null) > 0;
     }
 }
