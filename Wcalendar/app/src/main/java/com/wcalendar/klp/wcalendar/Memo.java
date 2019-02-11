@@ -1,6 +1,7 @@
 package com.wcalendar.klp.wcalendar;
 
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -8,8 +9,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Memo extends AppCompatActivity {
+    TextView memo_wifi_name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +28,7 @@ public class Memo extends AppCompatActivity {
         TextView memo_date = findViewById(R.id.memo_date);
         EditText memo_title = findViewById(R.id.memo_title);
         EditText memo_contents = findViewById(R.id.memo_contents);
-        TextView memo_wifi_name = findViewById(R.id.memo_wifi_name);
+        memo_wifi_name = findViewById(R.id.memo_wifi_name);
 
         Intent Memo_intent = getIntent();
         int year = Memo_intent.getIntExtra("intent_year", 0);
@@ -61,8 +64,20 @@ public class Memo extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent go_choice_wifi = new Intent(getApplicationContext(), ChoiceWifi.class);
-                startActivity(go_choice_wifi);
+                startActivityForResult(go_choice_wifi, 0);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        switch (resultCode) {
+            case 1:
+                String item1 = data.getStringExtra("name");
+                memo_wifi_name.setText(item1);
+                Toast.makeText(this, item1, Toast.LENGTH_SHORT).show();
+                break;
+
+        }
     }
 }

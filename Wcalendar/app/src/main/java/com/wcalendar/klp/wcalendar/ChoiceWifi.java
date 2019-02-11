@@ -12,7 +12,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,6 +84,18 @@ public class ChoiceWifi extends AppCompatActivity {
                 new int[] {R.id.text1, R.id.text2});
         listView.setAdapter(simpleAdapter);
 
+        //짧게클릭
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent go_memo_intent = new Intent();
+                go_memo_intent.putExtra("name", list.get(position).get("item 1"));
+                setResult(1, go_memo_intent);
+                finish();
+            }
+        });
+
+        //길게클릭
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
@@ -114,7 +125,7 @@ public class ChoiceWifi extends AppCompatActivity {
                     }
                 });
                 popupMenu.show();
-                return false;
+                return true;
             }
         });
     }
@@ -143,6 +154,5 @@ public class ChoiceWifi extends AppCompatActivity {
                 simpleAdapter.notifyDataSetChanged();
                 break;
         }
-
     }
 }

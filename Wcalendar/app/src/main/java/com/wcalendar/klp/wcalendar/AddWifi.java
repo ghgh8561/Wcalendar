@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class AddWifi extends AppCompatActivity {
     private DbOpenHelper mDbOpenHelper;
@@ -50,30 +51,34 @@ public class AddWifi extends AppCompatActivity {
         addWifi_insert_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = addWifi_wifiName.getText().toString().trim();
-                mDbOpenHelper.open();
-                mDbOpenHelper.create();
+                if(mac != null) {
+                    String name = addWifi_wifiName.getText().toString().trim();
+                    mDbOpenHelper.open();
+                    mDbOpenHelper.create();
 
-                if(isUpdate) { //편집
-                    long nowIndex = add_intent.getLongExtra("nowIndex", 0);
-                    int position = add_intent.getIntExtra("position", 0);
-                    mDbOpenHelper.wifiUpdateColumn(nowIndex, mac, name);
-                    Intent go_choice_intent = new Intent();
-                    go_choice_intent.putExtra("item 1", name);
-                    go_choice_intent.putExtra("item 2", mac);
-                    go_choice_intent.putExtra("position", position);
-                    setResult(2, go_choice_intent);
-                    finish();
+                    if(isUpdate) { //편집
+                        long nowIndex = add_intent.getLongExtra("nowIndex", 0);
+                        int position = add_intent.getIntExtra("position", 0);
+                        mDbOpenHelper.wifiUpdateColumn(nowIndex, mac, name);
+                        Intent go_choice_intent = new Intent();
+                        go_choice_intent.putExtra("item 1", name);
+                        go_choice_intent.putExtra("item 2", mac);
+                        go_choice_intent.putExtra("position", position);
+                        setResult(2, go_choice_intent);
+                        finish();
+                    }
+                    else { //삽입
+                        mDbOpenHelper.insertWifiColumn(mac, name);
+                        Intent go_choice_intent = new Intent();
+                        go_choice_intent.putExtra("item 1", name);
+                        go_choice_intent.putExtra("item 2", mac);
+                        setResult(1, go_choice_intent);
+                        finish();
+                    }
                 }
-                else { //삽입
-                    mDbOpenHelper.insertWifiColumn(mac, name);
-                    Intent go_choice_intent = new Intent();
-                    go_choice_intent.putExtra("item 1", name);
-                    go_choice_intent.putExtra("item 2", mac);
-                    setResult(1, go_choice_intent);
-                    finish();
+                else {
+                    Toast.makeText(AddWifi.this, "wifi 연결 확인해주세요", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
 
