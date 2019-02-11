@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +40,7 @@ public class Memo extends AppCompatActivity {
     }
 
     private void button() {
+        Date_btn();
         Button memo_insert_button = findViewById(R.id.memo_insert_button);
         Button memo_cancel_button = findViewById(R.id.memo_cancel_button);
         ImageButton memo_wifi_imageButton = findViewById(R.id.memo_wifi_imageButton);
@@ -65,6 +67,17 @@ public class Memo extends AppCompatActivity {
             public void onClick(View v) {
                 Intent go_choice_wifi = new Intent(getApplicationContext(), ChoiceWifi.class);
                 startActivityForResult(go_choice_wifi, 0);
+            }
+        });
+    }
+
+    public void Date_btn(){
+        ImageView memo_date_imageView = findViewById(R.id.memo_date_imageView);
+
+        memo_date_imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),SpinnerActivity.class));
             }
         });
     }

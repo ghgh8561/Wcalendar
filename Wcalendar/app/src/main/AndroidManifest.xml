@@ -32,6 +32,8 @@
         <activity android:name=".ChoiceWifi" />
         <activity android:name=".AddWifi" />
         <activity android:name=".Setting" />
+        <activity android:name=".SpinnerActivity"
+            android:theme="@style/Theme.AppCompat.Dialog"/>
 
         <service
             android:name=".MyService"
