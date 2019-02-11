@@ -1,36 +1,21 @@
 package com.example.ho.myapplication;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CalendarView;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ListPopupWindow;
-import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Calendar;
+
 
 public class testing extends AppCompatActivity {
-    private TextView showdate;
-    private Button datepicker;
-    private DatePickerDialog.OnDateSetListener dateSetListener;
+
+
 
     public static Activity _testing;
     SQLiteDatabase database;
@@ -46,16 +31,20 @@ public class testing extends AppCompatActivity {
 
         setContentView(R.layout.activity_testing);
 
-        showdate = (TextView) findViewById(R.id.show_date);
-        datepicker = (Button) findViewById(R.id.date_picker);
+        TextView showdate = findViewById(R.id.show_date);
+        Button date_btn = findViewById(R.id.date_btn);
         Button wifi_btn = findViewById(R.id.wifi_picker);
+        Intent i = getIntent();
         Intent intent = getIntent();
         TextView textView = findViewById(R.id.wifiname);
         textView.setText(intent.getStringExtra("macName"));
         mac = intent.getStringExtra("mac");
-        Log.d("year", String.valueOf(intent.getIntExtra("year", 0)));
-        Log.d("month", String.valueOf(intent.getIntExtra("month", 0)));
-        Log.d("day", String.valueOf(intent.getIntExtra("day", 0)));
+        Log.d("year", String.valueOf(intent.getIntExtra("c_year", 0)));
+        Log.d("month", String.valueOf(intent.getIntExtra("c_month", 0)));
+        Log.d("day", String.valueOf(intent.getIntExtra("c_day", 0)));
+
+
+
 
 
         editText_title = findViewById(R.id.memo_title);
@@ -63,37 +52,28 @@ public class testing extends AppCompatActivity {
         editText_title.setText(intent.getStringExtra("title"));
         editText_contents.setText(intent.getStringExtra("contents"));
 
-        String year = String.valueOf(intent.getIntExtra("year", 0));
-        String month = String.valueOf(intent.getIntExtra("month", 0));
-        String day = String.valueOf(intent.getIntExtra("day", 0));
-        String choose_date = year + "/" + month + "/" + day;
+        //Main2Activity 달력에서 선택한 일자
+        String c_year = String.valueOf(i.getIntExtra("c_year", 0));
+        String c_month = String.valueOf(i.getIntExtra("c_month", 0));
+        String c_day = String.valueOf(i.getIntExtra("c_day", 0));
+        String choose_date = c_year + "/" + c_month + "/" + c_day;
         showdate.setText(choose_date);
 
-        datepicker.setOnClickListener(new View.OnClickListener() {
+        //SpinnerActivity 스피너에서 선택한 일자
+        String s_year = String.valueOf(intent.getIntExtra("s_year", 0));
+        String s_month = String.valueOf(intent.getIntExtra("s_month", 0));
+        String s_day = String.valueOf(intent.getIntExtra("s_day", 0));
+        String spinner_date = s_year + "/" + s_month + "/" + s_day;
+        showdate.setText(spinner_date);
+
+        date_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar c = Calendar.getInstance();
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
-
-
-                DatePickerDialog dialog = new DatePickerDialog(
-                        testing.this, android.R.style.,
-                        dateSetListener, year,month,day);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                dialog.show();
+                Intent intent = new Intent(getApplicationContext(), SpinnerActivity.class);
+                startActivity(intent);
             }
         });
 
-        dateSetListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                month = month + 1;
-                String date = year + "/" + month + "/" + dayOfMonth;
-                showdate.setText(date);
-            }
-        };
 
          wifi_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,6 +86,7 @@ public class testing extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
 
         openDatabase("databaseName");
 
@@ -123,6 +104,7 @@ public class testing extends AppCompatActivity {
         });
 
     }
+
 
     private void openDatabase(String databaseName) {
         database = openOrCreateDatabase(databaseName, MODE_PRIVATE, null);
