@@ -17,7 +17,6 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.gun0912.tedpermission.PermissionListener;
-
 import com.gun0912.tedpermission.TedPermission;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.CalendarMode;
