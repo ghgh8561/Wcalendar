@@ -6,48 +6,131 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".checkbox">
+
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
         <CheckBox
-            android:id="@+id/fall"
-            android:text="강우량"
+            android:id="@+id/rain_setting_chkbox"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <EditText
-            android:hint="%를 적으세요"
+            android:layout_height="wrap_content"
+            android:text="강우량" />
+
+        <LinearLayout
+            android:id="@+id/rain_visible_box"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="0-100"
+                android:inputType="number"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/rain_setting_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="취소" />
+
+                <Button
+                    android:id="@+id/rain_setting_confirm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="적용" />
+
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
         <CheckBox
-            android:id="@+id/dust"
-            android:text="미세먼지"
+            android:id="@+id/dust_setting_chkbox"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <EditText
-            android:hint="농도를 적으세요"
+            android:layout_height="wrap_content"
+            android:text="미세먼지" />
+
+        <LinearLayout
+            android:id="@+id/dust_visible_box"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <EditText
+                android:id="@+id/dust_setting_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="0-500"
+                android:inputType="number"/>
+
+            <TextView
+                android:id="@+id/dust_setting_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/dust_setting_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="취소" />
+
+                <Button
+                    android:id="@+id/dust_setting_confirm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="적용" />
+            </LinearLayout>
+        </LinearLayout>
+
+
     </LinearLayout>
+
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
         <Button
             android:id="@+id/button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="적용" />
     </LinearLayout>
+
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/text"
