@@ -10,14 +10,15 @@ public class Area_name {
 
     double lat;
     double lon;
-    Context context;
     List<Address> address_List;
+
 
     public Area_name(Context context, double lat, double lon){
         this.lat = lat;
         this.lon = lon;
         this.context = context;
     }
+    Context context;
     public String Location_name(){//지역
         Geocoder geocoder = new Geocoder(context);
         String address = null;

@@ -21,6 +21,8 @@ public class POP_parser extends AsyncTask<String, Void, Document> {
     double lat;
     double lon;
 
+    Calculation calculation = new Calculation();
+
     public POP_parser(double lat, double lon) {
         this.lat = lat;
         this.lon = lon;
@@ -46,7 +48,6 @@ public class POP_parser extends AsyncTask<String, Void, Document> {
     protected Document doInBackground(String... strings) {
         while (true) {
             try {
-                Calculation calculation = new Calculation();
                 Calculation.LatXLngY latXLngY = calculation.convertGRID_GPS(Calculation.TO_GRID, lat, lon);
                 StringBuilder urlBuilder = new StringBuilder("http://www.kma.go.kr/wid/queryDFS.jsp?"); /*URL*/
                 urlBuilder.append(URLEncoder.encode("gridx", "UTF-8") + "=" + URLEncoder.encode(String.valueOf((int) latXLngY.x), "UTF-8"));
@@ -58,7 +59,6 @@ public class POP_parser extends AsyncTask<String, Void, Document> {
                 document.getDocumentElement().normalize();
                 break;
             } catch (Exception e) {
-                doInBackground();
                 e.printStackTrace();
             }
         }

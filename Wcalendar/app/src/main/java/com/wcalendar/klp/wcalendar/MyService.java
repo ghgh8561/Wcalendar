@@ -1,10 +1,13 @@
 package com.wcalendar.klp.wcalendar;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -23,6 +26,8 @@ import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.WindowManager;
+import android.widget.Toast;
 
 public class MyService extends Service implements LocationListener{
     private static final String CONNECTION_CONFIRM_CLIENT_URL = "http://clients3.google.com/generate_204";//인터넷연결상태를 확인하기위한 url
@@ -154,20 +159,30 @@ public class MyService extends Service implements LocationListener{
             @Override
             public void onAvailable(Network network) {//Wifi 연결됨
                 if (isOnline()) {//Wifi 연결이 되어있고, 인터넷이 사용가능할때
-                    if(isGetLocation) {// 위치정보가 켜져있을때
+                    if(isGetLocation == true) {// 위치정보가 켜져있을때
                         popParser = new POP_parser(lat,lon);
                         dustParser = new dust_parser(getApplicationContext(), lat, lon);
                         dustParser.execute();
                         popParser.execute();
+                    }if(isGetLocation == false){ // 위치정보가꺼져있을때 위치정보켜라는 팝업창
+                        Intent popup = new Intent(getApplicationContext(),NoLocationDialog.class);
+                        PendingIntent pi = PendingIntent.getActivity(getApplicationContext(),0, popup,PendingIntent.FLAG_ONE_SHOT);
+                        try{
+                            pi.send();
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
 
             @Override
             public void onLost(Network network) {//Wifi 끊어짐
+                if(isGetLocation == true) {
+                    dust_notifycation();
+                    POP_notifycation();
+                }
                 notifycation();
-                dust_notifycation();
-                POP_notifycation();
             }
         });
     }
@@ -210,7 +225,8 @@ public class MyService extends Service implements LocationListener{
             if (Integer.parseInt(dustParser.PM25_) > 75) cho_dust_msg = "매우나쁨";
         }
 
-        mBuilder.setContentTitle(dustParser.City_name());
+        City city = new City(getApplicationContext(), lat, lon);
+        mBuilder.setContentTitle(city.City_name());
         mBuilder.setContentText("미세먼지 : " + dustParser.PM10_ + "(" + dust_msg + ")" + " " +
                 "초미세먼지 : " + dustParser.PM25_ + "(" + cho_dust_msg + ")");
 
@@ -238,7 +254,8 @@ public class MyService extends Service implements LocationListener{
             mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
         else mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
 
-        mBuilder.setContentTitle(dustParser.addressname);
+        City city = new City(getApplicationContext(), lat, lon);
+        mBuilder.setContentTitle(city.full_name());
         mBuilder.setContentText("기온 : " + popParser.Temperatures + " " + "날씨 : " + popParser.wkKor + " " + "강수확률 : " + popParser.POP);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

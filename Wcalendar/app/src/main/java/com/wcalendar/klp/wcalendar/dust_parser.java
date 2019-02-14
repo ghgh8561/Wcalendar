@@ -26,12 +26,10 @@ public class dust_parser extends AsyncTask<String , Void, Document> {
     String PM10_;
     String PM25_;
 
-    String addressname;//전체주소
-
     double lat;
     double lon;
     Context context;
-    List<Address> addressList;
+
 
     public dust_parser(Context context, double lat, double lon){
         this.context = context;
@@ -39,37 +37,20 @@ public class dust_parser extends AsyncTask<String , Void, Document> {
         this.lon = lon;
     }
 
-    public String City_name(){
-        Geocoder geocoder = new Geocoder(context);
-        String[] cityName = null;
-        int i = 0;
-        try{
-            addressList = geocoder.getFromLocation(lat, lon, 10);
-            addressname = addressList.get(0).getAddressLine(0).replace(",","");
-            cityName = addressname.split(" ");
-            for(i = 0; i<cityName.length; i++) { // 문자열중 "시"가포함된 부분을 고름
-                if(cityName[i].contains("시"))
-                    break;
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return cityName[i];
-    }
-
     @Override
     protected void onPostExecute(Document document) {
         while(true) {
             try {
+                City city= new City(context, lat ,lon);
                 NodeList nodeList = document.getElementsByTagName("item");
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     Node node = nodeList.item(i);
                     Element element = (Element) node;
-                    if (City_name().equals(element.getElementsByTagName("cityName").item(0).getChildNodes().item(0).getNodeValue())) {
+                    if (city.City_name().equals(element.getElementsByTagName("cityName").item(0).getChildNodes().item(0).getNodeValue())) {
                         NodeList time = element.getElementsByTagName("dataTime");
                         time_ = time.item(0).getChildNodes().item(0).getNodeValue();
 
-                        location_ = City_name();
+                        location_ = city.City_name();
 
                         NodeList PM10 = element.getElementsByTagName("pm10Value");
                         PM10_ = PM10.item(0).getChildNodes().item(0).getNodeValue();

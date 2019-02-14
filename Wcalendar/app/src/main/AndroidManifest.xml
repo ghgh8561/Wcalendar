@@ -7,9 +7,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <application
         android:allowBackup="true"
@@ -32,13 +33,18 @@
         <activity android:name=".ChoiceWifi" />
         <activity android:name=".AddWifi" />
         <activity android:name=".Setting" />
-        <activity android:name=".SpinnerActivity"
-            android:theme="@style/Theme.AppCompat.Dialog"/>
+        <activity
+            android:name=".SpinnerActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
 
         <service
             android:name=".MyService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity android:name=".NoLocationDialog"
+            android:theme="@style/Theme.AppCompat.Dialog">
+        </activity>
     </application>
 
 </manifest>
