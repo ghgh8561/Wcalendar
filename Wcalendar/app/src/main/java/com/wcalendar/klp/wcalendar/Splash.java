@@ -13,7 +13,7 @@ public class Splash extends Activity {
         setContentView(R.layout.activity_splash);
 
         Handler hd = new Handler();
-        hd.postDelayed(new splashHandler(), 1000);
+        hd.postDelayed(new splashHandler(), 2000);
 
     }
 
