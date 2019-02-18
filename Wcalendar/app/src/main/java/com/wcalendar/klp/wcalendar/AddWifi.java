@@ -43,14 +43,14 @@ public class AddWifi extends AppCompatActivity {
         Button addWifi_insert_button = findViewById(R.id.addWifi_insert_button);
         final Button addWifi_cancel_button = findViewById(R.id.addWifi_cancel_button);
         final EditText addWifi_wifiName = findViewById(R.id.addWifi_wifiName);
-        WifiManager mng = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-        WifiInfo info = mng.getConnectionInfo();
-        final String mac = info.getBSSID();
 
         //저장버튼
         addWifi_insert_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                WifiManager mng = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                WifiInfo info = mng.getConnectionInfo();
+                String mac = info.getBSSID();
                 if(mac != null) {
                     String name = addWifi_wifiName.getText().toString().trim();
                     mDbOpenHelper.open();

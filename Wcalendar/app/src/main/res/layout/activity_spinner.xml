@@ -14,6 +14,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
         android:text="일자변경"
         android:textSize="20dp" />
 
@@ -31,20 +33,10 @@
         android:minDate="1/1/2018"></DatePicker>
 
 
-    <TextView
-        android:id="@+id/pick_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/date_spinner"
-        android:textSize="20dp" />
-
-
     <Button
         android:id="@+id/btn_confirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/pick_date"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:text="확인" />

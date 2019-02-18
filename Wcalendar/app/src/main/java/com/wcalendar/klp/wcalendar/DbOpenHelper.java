@@ -54,7 +54,7 @@ public class DbOpenHelper {
         mDBw.close();
     }
 
-    public long insertMemoColumn(String mac, String title, String contents, String year, String month, String day, String time) {
+    public long insertMemoColumn(String mac, String title, String contents, String year, String month, String day) {
         ContentValues values = new ContentValues();
         values.put(Database.CreateDB.MAC, mac);
         values.put(Database.CreateDB.TITLE, title);
@@ -62,8 +62,30 @@ public class DbOpenHelper {
         values.put(Database.CreateDB.YEAR, year);
         values.put(Database.CreateDB.MONTH, month);
         values.put(Database.CreateDB.DAY, day);
-        values.put(Database.CreateDB.TIME, time);
         return mDBw.insert(Database.CreateDB._TABLENAME0, null, values);
+    }
+
+    public Cursor memoSelectColumn(int year, int month, int day) {
+        Cursor c = mDBr.rawQuery(Database.CreateDB._SELECT0 +
+                " where year = " + year + " and month = " + month + " and day = " + day + ";", null);
+        return c;
+    }
+
+    public Cursor memoSelectColumn2() {
+        Cursor c = mDBr.rawQuery(Database.CreateDB._SELECT0 + ";", null);
+        return c;
+    }
+
+    public boolean memoDeleteColumn(long id) {
+        return mDBw.delete(Database.CreateDB._TABLENAME0, "_id=" + id, null) > 0;
+    }
+
+    public boolean memoUpdateColums(long id, String title, String contents, String mac) {
+        ContentValues values = new ContentValues();
+        values.put(Database.CreateDB.TITLE, title);
+        values.put(Database.CreateDB.CONTENTS, contents);
+        values.put(Database.CreateDB.MAC, mac);
+        return mDBr.update(Database.CreateDB._TABLENAME0, values, "_id=" + id, null) > 0;
     }
 
     public long insertWifiColumn(String mac, String name) {
@@ -75,6 +97,12 @@ public class DbOpenHelper {
 
     public Cursor wifiSelectColumn() {
         Cursor c = mDBr.rawQuery(Database.CreateDB._SELECT1, null);
+        return c;
+    }
+
+    public Cursor wifiSelectColumn2(String mac) {
+        Cursor c = mDBr.rawQuery(Database.CreateDB._SELECT2 +
+                " where mac = " + mac + ";", null);
         return c;
     }
 

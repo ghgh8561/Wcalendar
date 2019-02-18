@@ -90,6 +90,7 @@ public class ChoiceWifi extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent go_memo_intent = new Intent();
                 go_memo_intent.putExtra("name", list.get(position).get("item 1"));
+                go_memo_intent.putExtra("mac", list.get(position).get("item 2"));
                 setResult(1, go_memo_intent);
                 finish();
             }
