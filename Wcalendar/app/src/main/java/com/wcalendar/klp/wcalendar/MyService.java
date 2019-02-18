@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -90,12 +91,13 @@ public class MyService extends Service implements LocationListener{
 
     @Override
     public void onCreate() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            startForeground(1, new Notification());
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(1, new Notification());
         MyLocation();
         Network();
         return super.onStartCommand(intent, flags, startId);
@@ -160,10 +162,14 @@ public class MyService extends Service implements LocationListener{
             public void onAvailable(Network network) {//Wifi 연결됨
                 if (isOnline()) {//Wifi 연결이 되어있고, 인터넷이 사용가능할때
                     if(isGetLocation == true) {// 위치정보가 켜져있을때
-                        popParser = new POP_parser(lat,lon);
-                        dustParser = new dust_parser(getApplicationContext(), lat, lon);
-                        dustParser.execute();
-                        popParser.execute();
+                        if(isRainSwitchset()) {
+                            popParser = new POP_parser(lat,lon);
+                            popParser.execute();
+                        }
+                        if(isDustSwitchset()) {
+                            dustParser = new dust_parser(getApplicationContext(), lat, lon);
+                            dustParser.execute();
+                        }
                     }if(isGetLocation == false){ // 위치정보가꺼져있을때 위치정보켜라는 팝업창
                         Intent popup = new Intent(getApplicationContext(),NoLocationDialog.class);
                         PendingIntent pi = PendingIntent.getActivity(getApplicationContext(),0, popup,PendingIntent.FLAG_ONE_SHOT);
@@ -178,13 +184,41 @@ public class MyService extends Service implements LocationListener{
 
             @Override
             public void onLost(Network network) {//Wifi 끊어짐
-                if(isGetLocation == true) {
-                    dust_notifycation();
-                    POP_notifycation();
+                if(isGetLocation) {
+                    if(isDustSwitchset()) {
+                        dust_notifycation();
+                    }
+                    if(isRainSwitchset() && Integer.parseInt(popParser.POP)>= isRainNumset()) {
+                        POP_notifycation();
+                    }
                 }
                 notifycation();
             }
         });
+    }
+
+    public boolean isRainSwitchset(){
+        SharedPreferences sharedPreferences = getSharedPreferences("rain and dust",0);
+        boolean RainSwitchState = sharedPreferences.getBoolean("rain_check",false);
+        return RainSwitchState;
+    }
+
+    public int isRainNumset(){
+        SharedPreferences sharedPreferences = getSharedPreferences("rain and dust", 0);
+        String Rain_num = sharedPreferences.getString("rain_num",null);
+        int Rain_pop;
+        if(Rain_num == null)
+            Rain_pop = 0;
+        else
+            Rain_pop = Integer.parseInt(Rain_num);
+        return Rain_pop;
+    }
+
+    public boolean isDustSwitchset(){
+        SharedPreferences sharedPreferences = getSharedPreferences("rain and dust", 0);
+        boolean DustSwitchState = sharedPreferences.getBoolean("dust_check", false);
+        Log.d("Dust : ", String.valueOf(DustSwitchState));
+        return DustSwitchState;
     }
 
     public void dust_notifycation() { //미세먼지
@@ -267,7 +301,7 @@ public class MyService extends Service implements LocationListener{
 
     @Override
     public void onLocationChanged(Location location) {
-
+        getLocation();
     }
 
     @Override
