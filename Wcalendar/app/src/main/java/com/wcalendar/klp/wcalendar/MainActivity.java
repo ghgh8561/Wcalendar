@@ -288,6 +288,8 @@ public class MainActivity extends AppCompatActivity {
                 item.put("item 3", item3);
                 list.add(item);
                 simpleAdapter.notifyDataSetChanged();
+                MaterialCalendarView materialCalendarView = findViewById(R.id.calendarView);
+                materialCalendarView.removeDecorators();
                 CalendarView();
                 break;
 
