@@ -42,11 +42,14 @@ public class City {
         Geocoder geocoder = new Geocoder(context);
         List<Address> addressList;
         String addressname = null;
-        try{
-            addressList = geocoder.getFromLocation(lat, lon ,10);
-            addressname = addressList.get(0).getAddressLine(0).replace(",","");
-        }catch(Exception e){
-            e.printStackTrace();
+        while(true) {
+            try {
+                addressList = geocoder.getFromLocation(lat, lon, 10);
+                addressname = addressList.get(0).getAddressLine(0).replace(",", "");
+                break;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return addressname;
     }

@@ -1,13 +1,11 @@
 package com.wcalendar.klp.wcalendar;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -19,16 +17,11 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
-import android.view.WindowManager;
-import android.widget.Toast;
 
 public class MyService extends Service implements LocationListener{
     private static final String CONNECTION_CONFIRM_CLIENT_URL = "http://clients3.google.com/generate_204";//인터넷연결상태를 확인하기위한 url
@@ -217,7 +210,6 @@ public class MyService extends Service implements LocationListener{
     public boolean isDustSwitchset(){
         SharedPreferences sharedPreferences = getSharedPreferences("rain and dust", 0);
         boolean DustSwitchState = sharedPreferences.getBoolean("dust_check", false);
-        Log.d("Dust : ", String.valueOf(DustSwitchState));
         return DustSwitchState;
     }
 
@@ -240,23 +232,34 @@ public class MyService extends Service implements LocationListener{
         String dust_msg = "";
         String cho_dust_msg = "";
         //미세먼지 농도에따른 좋음,보통,나쁨,매우나쁨
-        if(dustParser.PM10_ != null) {
-            if (Integer.parseInt(dustParser.PM10_) <= 30) dust_msg = "좋음";
-            if (Integer.parseInt(dustParser.PM10_) > 30 && Integer.parseInt(dustParser.PM10_) <= 80)
-                dust_msg = "보통";
-            if (Integer.parseInt(dustParser.PM10_) > 80 && Integer.parseInt(dustParser.PM10_) <= 150)
-                dust_msg = "나쁨";
-            if (Integer.parseInt(dustParser.PM10_) > 150) dust_msg = "매우나쁨";
+        while(true){
+            try{
+                if (Integer.parseInt(dustParser.PM10_) <= 30) dust_msg = "좋음";
+                if (Integer.parseInt(dustParser.PM10_) > 30 && Integer.parseInt(dustParser.PM10_) <= 80)
+                    dust_msg = "보통";
+                if (Integer.parseInt(dustParser.PM10_) > 80 && Integer.parseInt(dustParser.PM10_) <= 150)
+                    dust_msg = "나쁨";
+                if (Integer.parseInt(dustParser.PM10_) > 150) dust_msg = "매우나쁨";
+                break;
+            }catch(NullPointerException e){
+                e.printStackTrace();
+            }
         }
 
         //초미세먼지 농도에따른 좋음,보통,나쁨,매우나쁨
-        if(dustParser.PM25_ != null) {
-            if (Integer.parseInt(dustParser.PM25_) <= 15) cho_dust_msg = "좋음";
-            if (Integer.parseInt(dustParser.PM25_) > 15 && Integer.parseInt(dustParser.PM25_) <= 35)
-                cho_dust_msg = "보통";
-            if (Integer.parseInt(dustParser.PM25_) > 35 && Integer.parseInt(dustParser.PM25_) <= 75)
-                cho_dust_msg = "나쁨";
-            if (Integer.parseInt(dustParser.PM25_) > 75) cho_dust_msg = "매우나쁨";
+        while(true) {
+            try {
+                if (Integer.parseInt(dustParser.PM25_) <= 15) cho_dust_msg = "좋음";
+                if (Integer.parseInt(dustParser.PM25_) > 15 && Integer.parseInt(dustParser.PM25_) <= 35)
+                    cho_dust_msg = "보통";
+                if (Integer.parseInt(dustParser.PM25_) > 35 && Integer.parseInt(dustParser.PM25_) <= 75)
+                    cho_dust_msg = "나쁨";
+                if (Integer.parseInt(dustParser.PM25_) > 75) cho_dust_msg = "매우나쁨";
+                break;
+            } catch (NullPointerException e) {
+
+                e.printStackTrace();
+            }
         }
 
         City city = new City(getApplicationContext(), lat, lon);
