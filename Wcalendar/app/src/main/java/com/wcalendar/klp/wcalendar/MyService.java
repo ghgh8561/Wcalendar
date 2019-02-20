@@ -35,6 +35,8 @@ public class MyService extends Service implements LocationListener{
     double lat;
     double lon;
 
+    boolean sound_check;
+
     public Location getLocation(){
         if(Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission
                 (getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission
@@ -128,19 +130,28 @@ public class MyService extends Service implements LocationListener{
                 .setAutoCancel(true);
 
         //기기소리설정에 따른 notify소리설정
-        if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL)
+        if (sound_check) {
             mBuilder.setDefaults(Notification.DEFAULT_SOUND);
-        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)
-            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
-        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE)
-            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
-        else mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+        }
+
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            notificationManager.createNotificationChannel(new NotificationChannel("default", "기본 채널",
+//                    NotificationManager.IMPORTANCE_DEFAULT));
+//        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.createNotificationChannel(new NotificationChannel("default", "기본 채널",
-                    NotificationManager.IMPORTANCE_DEFAULT));
+            NotificationChannel notificationChannel = new NotificationChannel(
+                    "default", "기본 채널", NotificationManager.IMPORTANCE_DEFAULT
+            );
+
+            if (!sound_check) {
+                notificationChannel.setSound(null, null);
+            }
+            notificationManager.createNotificationChannel(notificationChannel);
         }
+        sound_check = false;
         notificationManager.notify(0, mBuilder.build());
     }
 
@@ -153,6 +164,7 @@ public class MyService extends Service implements LocationListener{
         connectivityManager.registerNetworkCallback(builder.build(), new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(Network network) {//Wifi 연결됨
+                sound_check = true;
                 if (isOnline()) {//Wifi 연결이 되어있고, 인터넷이 사용가능할때
                     if(isGetLocation == true) {// 위치정보가 켜져있을때
                         if(isRainSwitchset()) {
@@ -221,13 +233,17 @@ public class MyService extends Service implements LocationListener{
                 .setAutoCancel(true);
 
         //기기소리설정에 따른 notify소리설정
-        if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL)
+//        if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL)
+//            mBuilder.setDefaults(Notification.DEFAULT_SOUND);
+//        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)
+//            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+//        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE)
+//            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+//        else mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+
+        if (sound_check) {
             mBuilder.setDefaults(Notification.DEFAULT_SOUND);
-        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)
-            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
-        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE)
-            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
-        else mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+        }
 
         String dust_msg = "";
         String cho_dust_msg = "";
@@ -268,10 +284,22 @@ public class MyService extends Service implements LocationListener{
                 "초미세먼지 : " + dustParser.PM25_ + "(" + cho_dust_msg + ")");
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            notificationManager.createNotificationChannel(new NotificationChannel("default", "기본 채널",
+//                    NotificationManager.IMPORTANCE_DEFAULT));
+//        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.createNotificationChannel(new NotificationChannel("default", "기본 채널",
-                    NotificationManager.IMPORTANCE_DEFAULT));
+            NotificationChannel notificationChannel = new NotificationChannel(
+                    "default", "기본 채널", NotificationManager.IMPORTANCE_DEFAULT
+            );
+
+            if (!sound_check) {
+                notificationChannel.setSound(null, null);
+            }
+            notificationManager.createNotificationChannel(notificationChannel);
         }
+        sound_check = false;
         notificationManager.notify(1, mBuilder.build());
     }
 
@@ -282,23 +310,41 @@ public class MyService extends Service implements LocationListener{
                 .setSmallIcon(android.R.drawable.btn_star)
                 .setAutoCancel(true);
 
+
+
         //기기소리설정에 따른 notify소리설정
-        if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL)
+//        if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL)
+//            mBuilder.setDefaults(Notification.DEFAULT_SOUND);
+//        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)
+//            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+//        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE)
+//            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+//        else mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+
+        if (sound_check) {
             mBuilder.setDefaults(Notification.DEFAULT_SOUND);
-        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT)
-            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
-        else if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE)
-            mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
-        else mBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+        }
 
         City city = new City(getApplicationContext(), lat, lon);
         mBuilder.setContentTitle(city.full_name());
         mBuilder.setContentText("기온 : " + popParser.Temperatures + " " + "날씨 : " + popParser.wkKor + " " + "강수확률 : " + popParser.POP);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            notificationManager.createNotificationChannel(new NotificationChannel("default", "기본 채널",
+//                    NotificationManager.IMPORTANCE_DEFAULT));
+//        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationManager.createNotificationChannel(new NotificationChannel("default", "기본 채널",
-                    NotificationManager.IMPORTANCE_DEFAULT));
+            NotificationChannel notificationChannel = new NotificationChannel(
+                    "default", "기본 채널", NotificationManager.IMPORTANCE_DEFAULT
+            );
+
+            if (!sound_check) {
+                notificationChannel.setSound(null, null);
+            }
+            notificationManager.createNotificationChannel(notificationChannel);
         }
+        sound_check = false;
         notificationManager.notify(2, mBuilder.build());
     }
 
