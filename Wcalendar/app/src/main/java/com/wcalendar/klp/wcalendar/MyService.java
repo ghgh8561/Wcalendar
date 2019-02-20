@@ -126,7 +126,7 @@ public class MyService extends Service implements LocationListener{
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE); // 기기 소리설정을 가져오기위함
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "default")
-                .setSmallIcon(android.R.drawable.btn_star)
+                .setSmallIcon(R.drawable.ic_stat_name)
                 .setContentTitle("Wcalender")
                 .setContentText("실행중")
                 .setAutoCancel(true);
@@ -241,7 +241,7 @@ public class MyService extends Service implements LocationListener{
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE); // 기기 소리설정을 가져오기위함
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "default")
-                .setSmallIcon(android.R.drawable.btn_star)
+                .setSmallIcon(R.drawable.ic_stat_name)
                 .setAutoCancel(true);
 
         //기기소리설정에 따른 notify소리설정
@@ -311,7 +311,7 @@ public class MyService extends Service implements LocationListener{
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE); // 기기 소리설정을 가져오기위함
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "default")
-                .setSmallIcon(android.R.drawable.btn_star)
+                .setSmallIcon(R.drawable.ic_stat_name)
                 .setAutoCancel(true);
 
 
