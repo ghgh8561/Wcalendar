@@ -34,6 +34,7 @@ public class MyService extends Service implements LocationListener{
     Location location;
     double lat;
     double lon;
+    String City_FullName;
 
     boolean sound_check;
 
@@ -94,6 +95,7 @@ public class MyService extends Service implements LocationListener{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         MyLocation();
+        City_FullName = City_Name();
         Network();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -156,6 +158,10 @@ public class MyService extends Service implements LocationListener{
     }
 
     private void Network() { //와이파이 연결끊어짐과 연결됨 상태체크
+        popParser = new POP_parser(lat,lon);
+        popParser.execute();
+        dustParser = new dust_parser(getApplicationContext(), lat, lon);
+        dustParser.execute();
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkRequest.Builder builder = new NetworkRequest.Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
@@ -225,6 +231,12 @@ public class MyService extends Service implements LocationListener{
         return DustSwitchState;
     }
 
+    public String City_Name(){
+        City city = new City(getApplicationContext(), lat, lon);
+        String FullName = city.full_name();
+        return FullName;
+    }
+
     public void dust_notifycation() { //미세먼지
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE); // 기기 소리설정을 가져오기위함
 
@@ -248,34 +260,26 @@ public class MyService extends Service implements LocationListener{
         String dust_msg = "";
         String cho_dust_msg = "";
         //미세먼지 농도에따른 좋음,보통,나쁨,매우나쁨
-        while(true){
-            try{
-                if (Integer.parseInt(dustParser.PM10_) <= 30) dust_msg = "좋음";
-                if (Integer.parseInt(dustParser.PM10_) > 30 && Integer.parseInt(dustParser.PM10_) <= 80)
-                    dust_msg = "보통";
-                if (Integer.parseInt(dustParser.PM10_) > 80 && Integer.parseInt(dustParser.PM10_) <= 150)
-                    dust_msg = "나쁨";
-                if (Integer.parseInt(dustParser.PM10_) > 150) dust_msg = "매우나쁨";
-                break;
-            }catch(NullPointerException e){
-                e.printStackTrace();
-            }
+
+        if(dustParser.PM10_ == null)dust_msg = "파싱실패";
+        else {
+            if (Integer.parseInt(dustParser.PM10_) <= 30) dust_msg = "좋음";
+            if (Integer.parseInt(dustParser.PM10_) > 30 && Integer.parseInt(dustParser.PM10_) <= 80)
+                dust_msg = "보통";
+            if (Integer.parseInt(dustParser.PM10_) > 80 && Integer.parseInt(dustParser.PM10_) <= 150)
+                dust_msg = "나쁨";
+            if (Integer.parseInt(dustParser.PM10_) > 150) dust_msg = "매우나쁨";
         }
 
         //초미세먼지 농도에따른 좋음,보통,나쁨,매우나쁨
-        while(true) {
-            try {
-                if (Integer.parseInt(dustParser.PM25_) <= 15) cho_dust_msg = "좋음";
-                if (Integer.parseInt(dustParser.PM25_) > 15 && Integer.parseInt(dustParser.PM25_) <= 35)
-                    cho_dust_msg = "보통";
-                if (Integer.parseInt(dustParser.PM25_) > 35 && Integer.parseInt(dustParser.PM25_) <= 75)
-                    cho_dust_msg = "나쁨";
-                if (Integer.parseInt(dustParser.PM25_) > 75) cho_dust_msg = "매우나쁨";
-                break;
-            } catch (NullPointerException e) {
-
-                e.printStackTrace();
-            }
+        if(dustParser.PM25_ == null) cho_dust_msg = "파싱실패";
+        else {
+            if (Integer.parseInt(dustParser.PM25_) <= 15) cho_dust_msg = "좋음";
+            if (Integer.parseInt(dustParser.PM25_) > 15 && Integer.parseInt(dustParser.PM25_) <= 35)
+                cho_dust_msg = "보통";
+            if (Integer.parseInt(dustParser.PM25_) > 35 && Integer.parseInt(dustParser.PM25_) <= 75)
+                cho_dust_msg = "나쁨";
+            if (Integer.parseInt(dustParser.PM25_) > 75) cho_dust_msg = "매우나쁨";
         }
 
         City city = new City(getApplicationContext(), lat, lon);
@@ -325,8 +329,7 @@ public class MyService extends Service implements LocationListener{
             mBuilder.setDefaults(Notification.DEFAULT_SOUND);
         }
 
-        City city = new City(getApplicationContext(), lat, lon);
-        mBuilder.setContentTitle(city.full_name());
+        mBuilder.setContentTitle(City_FullName);
         mBuilder.setContentText("기온 : " + popParser.Temperatures + " " + "날씨 : " + popParser.wkKor + " " + "강수확률 : " + popParser.POP);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
