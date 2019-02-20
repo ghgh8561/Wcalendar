@@ -60,12 +60,10 @@ public class MainActivity extends AppCompatActivity {
         PermissionListener permissionListener = new PermissionListener() {
             @Override
             public void onPermissionGranted() { // 퍼미션 권한 획득시 실행되는 메소드
-                startService(new Intent(getApplicationContext(), MyService.class));
-//                MyService myService = new MyService();
-//                if(myService.isGetLocation == false){
-//                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-//                    startActivityForResult(intent,1);
-//                }
+                Intent Service_Start_intent = new Intent(getApplicationContext(),MyService.class);
+                Service_State service_state = new Service_State(getApplicationContext());
+                if(!service_state.isServiceRunning())
+                    startService(Service_Start_intent);
                 Toast.makeText(getApplicationContext(),"됏다!",Toast.LENGTH_LONG).show();
             }
 
