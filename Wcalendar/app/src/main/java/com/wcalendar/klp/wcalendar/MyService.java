@@ -1,34 +1,45 @@
 package com.wcalendar.klp.wcalendar;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 public class MyService extends Service implements LocationListener{
     private static final String CONNECTION_CONFIRM_CLIENT_URL = "http://clients3.google.com/generate_204";//인터넷연결상태를 확인하기위한 url
+    private DbOpenHelper dbOpenHelper;
     dust_parser dustParser;// 미세먼지 파싱 클래스
     POP_parser popParser; // 기상청날씨파싱
+
+    String City_FullName;
+    String City_Name;
+    boolean sound_check;
 
     boolean isGPSEnable = false;//gps사용가능여부
     boolean isNetWorkEnable = false;//네트워크사용가능여부
@@ -36,10 +47,6 @@ public class MyService extends Service implements LocationListener{
     Location location;
     double lat;
     double lon;
-    String City_FullName;
-    String City_Name;
-
-    boolean sound_check;
 
     public Location getLocation(){
         if(Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission
@@ -48,7 +55,7 @@ public class MyService extends Service implements LocationListener{
             return null;
         }
         try{
-            LocationManager locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+            LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
             isGPSEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             isNetWorkEnable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -58,7 +65,7 @@ public class MyService extends Service implements LocationListener{
             }else{
                 isGetLocation = true;
                 if(isNetWorkEnable){
-                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,10,1, this);
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,10,1, (LocationListener) this);
                     if(locationManager != null){
                         location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     }if(location != null){
@@ -66,7 +73,7 @@ public class MyService extends Service implements LocationListener{
                         lon = location.getLongitude();
                     }
                 }if(isGPSEnable){
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,10,1, this);
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,10,1, (LocationListener) this);
                     if(locationManager != null){
                         location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     }if(location != null){
@@ -94,8 +101,10 @@ public class MyService extends Service implements LocationListener{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         getLocation();
+        Log.d("TAG : ", "onStartCommand");
         City_FullName = City_Full_Name();
         City_Name = CityName();
+        parser();
         Network();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -110,6 +119,15 @@ public class MyService extends Service implements LocationListener{
         return null;
     }
 
+    public void parser(){
+        if(isOnline()){
+            popParser = new POP_parser(lat,lon);
+            popParser.execute();
+            dustParser = new dust_parser(getApplicationContext(), lat, lon);
+            dustParser.execute();
+        }
+    }
+
     public boolean isOnline() { // 인터넷연결감지 메소드(연결은되어있지만 인터넷사용불가를 테스트하기위함)
         Internet_state_check internet_state_check = new Internet_state_check(CONNECTION_CONFIRM_CLIENT_URL);
         internet_state_check.start();
@@ -122,25 +140,36 @@ public class MyService extends Service implements LocationListener{
         return false;
     }
 
-    public void notifycation() { //알람서비스 샘플 수정필요함
+    public String mac_address(){ // 현재연결되어있는 wifi mac주소
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        String mac = wifiInfo.getBSSID();
+        return mac;
+    }
+
+    public void memo_notifycation() { //메모알림서비스 다중입력시 여러개보이게 하는 방법알아내야함.
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon(R.drawable.ic_stat_name)
-                .setContentTitle("Wcalender")
-                .setContentText("실행중")
                 .setAutoCancel(true);
+        dbOpenHelper = new DbOpenHelper(getApplicationContext());
+        dbOpenHelper.open();
+        String Title = null;
+        String Content = null;
+        Cursor cursor = dbOpenHelper.memoSelectColumn2();
+        while(cursor.moveToNext()){
+                Title = cursor.getString(cursor.getColumnIndex("title"));
+                Content = cursor.getString(cursor.getColumnIndex("contents"));
+        }
+        mBuilder.setContentTitle(Title)
+                .setContentText(Content);
 
-        //기기소리설정에 따른 notify소리설정
         if (sound_check) {
             mBuilder.setDefaults(Notification.DEFAULT_SOUND);
         }
 
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            notificationManager.createNotificationChannel(new NotificationChannel("default", "기본 채널",
-//                    NotificationManager.IMPORTANCE_DEFAULT));
-//        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationManager.deleteNotificationChannel("default");
@@ -159,11 +188,14 @@ public class MyService extends Service implements LocationListener{
         notificationManager.notify(0, mBuilder.build());
     }
 
+    public void Wakeup(){
+        PowerManager PM = (PowerManager) getSystemService(POWER_SERVICE);
+        @SuppressLint("InvalidWakeLockTag") PowerManager.WakeLock wakeLock = PM.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, "WAKEUP");
+        wakeLock.acquire(1000);
+        wakeLock.release();
+    }
+
     private void Network() { //와이파이 연결끊어짐과 연결됨 상태체크
-        popParser = new POP_parser(lat,lon);
-        popParser.execute();
-        dustParser = new dust_parser(getApplicationContext(), lat, lon);
-        dustParser.execute();
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkRequest.Builder builder = new NetworkRequest.Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
@@ -200,14 +232,28 @@ public class MyService extends Service implements LocationListener{
                 if(isGetLocation) {
                     if(isDustSwitchset()) {
                         dust_notifycation();
+                        Wakeup();
                     }
                     if(isRainSwitchset() && Integer.parseInt(popParser.POP)>= isRainNumset()) {
                         POP_notifycation();
+                        Wakeup();
                     }
                 }
-                notifycation();
+                memo_notifycation();
             }
         });
+    }
+
+    public void Bluetooth_notify(){
+        if(isBluetooth()){
+
+        }
+    }
+
+    public boolean isBluetooth(){
+        SharedPreferences sharedPreferences = getSharedPreferences("rain and dust",0);
+        boolean Bluetooth = sharedPreferences.getBoolean("bluetooth_check",false);
+        return Bluetooth;
     }
 
     public boolean isRainSwitchset(){

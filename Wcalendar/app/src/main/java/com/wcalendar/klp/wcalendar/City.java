@@ -41,7 +41,7 @@ public class City {
     public String full_name(){
         Geocoder geocoder = new Geocoder(context);
         List<Address> addressList;
-        String addressname = null;
+        String addressname;
         while(true) {
             try {
                 addressList = geocoder.getFromLocation(lat, lon, 10);

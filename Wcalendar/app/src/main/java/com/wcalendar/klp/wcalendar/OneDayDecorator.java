@@ -28,8 +28,8 @@ public class OneDayDecorator implements DayViewDecorator {
     @Override
     public void decorate(DayViewFacade view) {
         view.addSpan(new StyleSpan(Typeface.BOLD));
-        view.addSpan(new AbsoluteSizeSpan(25));
-        view.addSpan(new ForegroundColorSpan(Color.RED));
+        view.addSpan(new AbsoluteSizeSpan(35));
+        view.addSpan(new ForegroundColorSpan(Color.BLACK));
     }
 
     public void setDate(Date date) {

@@ -1,11 +1,7 @@
 package com.wcalendar.klp.wcalendar;
 
 import android.content.Context;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.AsyncTask;
-import android.util.Log;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -14,7 +10,6 @@ import org.xml.sax.InputSource;
 
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

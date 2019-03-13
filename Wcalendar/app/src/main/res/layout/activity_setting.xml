@@ -28,6 +28,16 @@
         android:text="미세먼지"
         android:textSize="18sp" />
 
+    <Switch
+        android:id="@+id/setting_bluetooth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="90dp"
+        android:text="블루투스"
+        android:textSize="18sp" />
+
     <EditText
         android:id="@+id/setting_rain_editText"
         android:layout_width="match_parent"

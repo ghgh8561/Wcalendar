@@ -17,6 +17,7 @@ public class Setting extends AppCompatActivity {
     EditText setting_rain_editText;
     Switch setting_rain_switch;
     Switch setting_dust_switch;
+    Switch setting_bluetooth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +27,14 @@ public class Setting extends AppCompatActivity {
         button();
         rain_Load_shared_pref();
         dust_Load_shared_pref();
+        bluetooth_Load_shared_pref();
     }
 
+    public void bluetooth_Load_shared_pref(){
+        SharedPreferences sharedPreferences = getSharedPreferences("rain and dust",0);
+        boolean bluetooth = sharedPreferences.getBoolean("bluetooth_check",false);
+        setting_bluetooth.setChecked(bluetooth);
+    }
     public void dust_Load_shared_pref(){
         SharedPreferences sharedPreferences = getSharedPreferences("rain and dust",0);
         boolean dust_checking = sharedPreferences.getBoolean("dust_check",false);
@@ -45,6 +52,7 @@ public class Setting extends AppCompatActivity {
     private void button() {
         setting_rain_switch = findViewById(R.id.setting_rain_switch);
         setting_dust_switch = findViewById(R.id.setting_dust_switch);
+        setting_bluetooth = findViewById(R.id.setting_bluetooth);
         setting_rain_editText = findViewById(R.id.setting_rain_editText);
         final LinearLayout setting_button_layout = findViewById(R.id.setting_button_layout);
         final Button saveBtn = findViewById(R.id.setting_insert_button);
@@ -104,6 +112,15 @@ public class Setting extends AppCompatActivity {
                 SharedPreferences sharedPreferences = getSharedPreferences("rain and dust",0);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putBoolean("dust_check",setting_dust_switch.isChecked());
+                editor.commit();
+            }
+        });
+        setting_bluetooth.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences sharedPreferences = getSharedPreferences("rain and dust",0);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("bluetooth_check",setting_bluetooth.isChecked());
                 editor.commit();
             }
         });
